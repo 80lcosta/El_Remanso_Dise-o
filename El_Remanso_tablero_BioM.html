@@ -1,0 +1,1109 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>Tablero El Remanso</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: barra superior + pestañas; columna de palancas a la izquierda, contenido a la derecha. Planilla de campo, limpia. */
+:root{
+  --bg:#f5f6f2; --surface:#ffffff; --surface-2:#eef1eb; --ink:#16201a; --ink-2:#4a554d; --muted:#7f8981;
+  --line:#e0e4dc; --line-2:#cdd3c8; --accent:#2c6a41; --accent-ink:#ffffff; --accent-soft:#e2eee5;
+  --good:#1f8a3b; --good-soft:#e1f2e5; --warn:#a86b00; --warn-soft:#fbf0d9; --bad:#c23a3a; --bad-soft:#fae3e1;
+  --s-prim:#1baf7a; --s-ver:#eb6834; --s-oto:#eda100; --s-inv:#2a78d6;
+  --r-past:#2f8a4a; --r-pz:#9db45f; --r-av:#6250d6; --r-rg:#e87ba4; --r-silo:#eb6834; --r-rollo:#eda100;
+  --h-cab:#2a78d6; --h-cue:#1baf7a; --h-col:#eda100; --h-vieja:#6250d6;
+  --div-neg:#d24b4b; --div-mid:#f0efec; --div-pos:#2a78d6;
+  --f-display:"Newsreader", Georgia, "Times New Roman", serif;
+  --f-body:"Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --radius:10px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0f1311; --surface:#171c19; --surface-2:#1f2621; --ink:#edf1ec; --ink-2:#bfc7bf; --muted:#8a938b;
+  --line:#2a322c; --line-2:#3a443c; --accent:#6dbb87; --accent-ink:#0f1311; --accent-soft:#1d3325;
+  --good:#4cc46c; --good-soft:#173322; --warn:#e2a93a; --warn-soft:#352a13; --bad:#ef7676; --bad-soft:#3a1d1d;
+  --s-prim:#199e70; --s-ver:#d95926; --s-oto:#c98500; --s-inv:#3987e5;
+  --r-past:#3a9e57; --r-pz:#8aa04f; --r-av:#9085e9; --r-rg:#d55181; --r-silo:#d95926; --r-rollo:#c98500;
+  --h-cab:#3987e5; --h-cue:#199e70; --h-col:#c98500; --h-vieja:#9085e9;
+  --div-neg:#e66767; --div-mid:#383835; --div-pos:#3987e5; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0f1311; --surface:#171c19; --surface-2:#1f2621; --ink:#edf1ec; --ink-2:#bfc7bf; --muted:#8a938b;
+  --line:#2a322c; --line-2:#3a443c; --accent:#6dbb87; --accent-ink:#0f1311; --accent-soft:#1d3325;
+  --good:#4cc46c; --good-soft:#173322; --warn:#e2a93a; --warn-soft:#352a13; --bad:#ef7676; --bad-soft:#3a1d1d;
+  --s-prim:#199e70; --s-ver:#d95926; --s-oto:#c98500; --s-inv:#3987e5;
+  --r-past:#3a9e57; --r-pz:#8aa04f; --r-av:#9085e9; --r-rg:#d55181; --r-silo:#d95926; --r-rollo:#c98500;
+  --h-cab:#3987e5; --h-cue:#199e70; --h-col:#c98500; --h-vieja:#9085e9;
+  --div-neg:#e66767; --div-mid:#383835; --div-pos:#3987e5; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.45;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}
+a{color:var(--accent)}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+/* ---- barra superior ---- */
+.top{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:20}
+@media (max-width:980px){.top{position:static}}
+.top-in{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding-block:12px;max-width:1440px;margin:0 auto}
+.brand{display:flex;align-items:baseline;gap:12px;min-width:0}
+.wordmark{font-family:var(--f-display);font-size:26px;font-weight:500;letter-spacing:-.01em;color:var(--accent);line-height:1}
+.wordmark em{font-style:italic}
+.ttl{display:flex;flex-direction:column;min-width:0}
+.ttl b{font-family:var(--f-display);font-weight:500;font-size:19px;line-height:1.15}
+.ttl span{color:var(--muted);font-size:12px}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.status{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:4px 10px;white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.status.live .dot{background:var(--good);box-shadow:0 0 0 3px var(--good-soft)}
+.status.loading .dot{background:var(--warn)}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-2);background:var(--surface);border-radius:8px;padding:6px 12px;cursor:pointer;text-decoration:none;color:var(--ink);font-size:13px;font-weight:500;white-space:nowrap}
+.btn:hover{background:var(--surface-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn svg{width:14px;height:14px}
+.btn.icon{padding:6px 9px}
+.btn.icon .i-sun{display:none}
+.is-dark .btn.icon .i-sun{display:block} .is-dark .btn.icon .i-moon{display:none}
+.seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:3px;gap:2px}
+.seg button{border:0;background:transparent;border-radius:6px;padding:5px 11px;cursor:pointer;font-size:13px;color:var(--ink-2);white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+/* ---- pestañas ---- */
+.tabs{background:var(--surface);border-bottom:1px solid var(--line)}
+.tabs-in{display:flex;gap:4px;overflow-x:auto;max-width:1440px;margin:0 auto;scrollbar-width:none}
+.tabs-in::-webkit-scrollbar{display:none}
+.tab{border:0;background:none;padding:11px 12px;cursor:pointer;color:var(--ink-2);font-weight:500;border-bottom:2px solid transparent;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tab:hover{color:var(--ink)}
+/* ---- layout ---- */
+.layout{display:grid;grid-template-columns:280px minmax(0,1fr);gap:24px;max-width:1440px;margin:0 auto;padding-block:20px 40px}
+@media (max-width:980px){.layout{grid-template-columns:minmax(0,1fr)}}
+.levers{align-self:start;position:sticky;top:120px;display:flex;flex-direction:column;gap:14px}
+.lv-sum{display:none}
+@media (max-width:980px){.lv-sum{display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-weight:600;list-style:none}.lv-sum::-webkit-details-marker{display:none}.lv-sum::after{content:"Mostrar";font-weight:500;color:var(--accent);font-size:13px}details[open]>.lv-sum::after{content:"Ocultar"}details[open]>.lv-sum{margin-bottom:10px}}
+@media (max-width:980px){.levers{position:static}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+.panel h3{margin:0 0 4px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.lever{display:flex;flex-direction:column;gap:4px;padding-block:9px;border-top:1px solid var(--line)}
+.lever:first-of-type{border-top:0}
+.lever-h{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.lever-h label{font-size:13px;color:var(--ink-2)}
+.lever-h output{font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.lever.changed .lever-h output{color:var(--accent)}
+.lever small{color:var(--muted);font-size:11px}
+input[type=range]{width:100%;accent-color:var(--accent);margin:2px 0}
+.mini{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mini div{display:flex;flex-direction:column}
+.mini b{font-size:18px;font-variant-numeric:tabular-nums}
+.mini span{font-size:11px;color:var(--muted)}
+.lev-foot{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.changes{font-size:12px;color:var(--ink-2)}
+/* ---- contenido ---- */
+main{min-width:0;display:flex;flex-direction:column;gap:20px}
+.sec-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.sec-head h2{font-family:var(--f-display);font-weight:500;font-size:28px;margin:0;line-height:1.1;text-wrap:balance}
+.sec-head h2 em{color:var(--accent)}
+.sec-head p{margin:4px 0 0;color:var(--ink-2);max-width:70ch}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.kpis.k5{grid-template-columns:repeat(5,minmax(0,1fr))}
+@media (max-width:1280px){.kpis.k5{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:1100px){.kpis,.kpis.k5{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:460px){.kpis,.kpis.k5{grid-template-columns:minmax(0,1fr)}}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-width:0;position:relative}
+.kpi .lbl{font-size:12px;color:var(--ink-2);font-weight:500}
+.kpi .val{font-size:26px;font-weight:600;letter-spacing:-.01em;line-height:1.1}
+.kpi .val small{font-size:13px;font-weight:500;color:var(--muted);margin-left:3px}
+.kpi .sub{font-size:12px;color:var(--muted)}
+.kpi .delta{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.delta.up{color:var(--good)} .delta.down{color:var(--bad)} .delta.eq{color:var(--muted);font-weight:500}
+.kpi.hero{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.kpi.hero .lbl,.kpi.hero .sub,.kpi.hero .val small{color:inherit;opacity:.85}
+.kpi.hero .delta{color:inherit}
+.band{position:relative;height:8px;border-radius:4px;background:var(--surface-2);margin-top:6px}
+.band i{position:absolute;top:0;bottom:0;background:var(--accent-soft);border-left:1px solid var(--line-2);border-right:1px solid var(--line-2)}
+.band b{position:absolute;top:-3px;width:3px;height:14px;border-radius:2px;background:var(--ink)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:1100px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;min-width:0}
+.card h4{margin:0;font-size:15px;font-weight:600}
+.card .cap{margin:2px 0 12px;color:var(--muted);font-size:12px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--ink-2);margin-bottom:8px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.chart svg{width:100%;height:auto;display:block;overflow:visible}
+.chart text{fill:var(--muted);font-size:11px;font-family:var(--f-body)}
+.chart .lab{fill:var(--ink-2);font-weight:600}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .base{stroke:var(--line-2);stroke-width:1}
+.chart .ref{stroke:var(--ink);stroke-width:1.5;stroke-dasharray:4 3}
+.chart .reft{fill:var(--ink);font-weight:600}
+.chart rect.m,.chart path.m{stroke:var(--surface);stroke-width:1}
+.chart .hit:hover{fill:var(--ink);opacity:.06}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:13px}
+th,td{padding:7px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:var(--surface)}
+thead th{font-size:12px;color:var(--muted);font-weight:600;background:var(--surface)}
+tr.grp td{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--surface-2)}
+tr.grp td:first-child{background:var(--surface-2)}
+tr.tot td{font-weight:700}
+td.bind,th.bind{background:var(--accent-soft)}
+.pill{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:600;white-space:nowrap}
+.pill.ok{background:var(--good-soft);color:var(--good)} .pill.no{background:var(--bad-soft);color:var(--bad)} .pill.wa{background:var(--warn-soft);color:var(--warn)} .pill.mu{background:var(--surface-2);color:var(--muted)}
+/* heatmap */
+.heat{table-layout:fixed}
+.heat th{text-align:center;padding:4px 2px;font-size:11px}
+.heat th:first-child{width:74px}
+.heat td{text-align:center;font-size:11.5px;padding:7px 2px;border:2px solid var(--surface)}
+.heat td:first-child{text-align:left;font-weight:500;color:var(--ink-2)}
+.heat .cell{border-radius:6px;font-weight:600}
+/* rotación */
+.rot td,.rot th{padding:4px;text-align:center}
+.rot td:first-child,.rot th:first-child{text-align:left;padding-left:10px}
+.rot .meta{color:var(--muted);font-size:11px;display:block}
+.crop{appearance:none;-webkit-appearance:none;border:0;border-radius:6px;padding:7px 4px;width:100%;min-width:76px;font-size:12px;font-weight:600;text-align:center;text-align-last:center;cursor:pointer}
+.crop:hover{filter:brightness(.96)}
+.crop.edited{box-shadow:inset 0 0 0 2px var(--ink)}
+.tags{display:flex;gap:3px;justify-content:center;margin-top:3px;min-height:15px}
+.tag{font-size:10px;font-weight:700;border-radius:4px;padding:0 4px;line-height:15px}
+.tag.av{background:color-mix(in srgb,var(--r-av) 18%,transparent);color:var(--r-av)}
+.tag.rg{background:color-mix(in srgb,var(--r-rg) 20%,transparent);color:var(--r-rg)}
+.list{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.list li{display:flex;gap:10px;align-items:flex-start}
+.insights li{display:block;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.insights b{font-weight:600}
+.note{font-size:12px;color:var(--muted);max-width:90ch}
+.campsel{display:flex;flex-wrap:wrap;gap:4px}
+.campsel button{border:1px solid var(--line-2);background:var(--surface);border-radius:7px;padding:5px 10px;cursor:pointer;font-variant-numeric:tabular-nums;font-size:13px}
+.campsel button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.campsel button.lim{border-color:var(--accent)}
+.rgrow{display:grid;grid-template-columns:64px 1fr 92px;gap:10px;align-items:center;padding-block:6px;border-top:1px solid var(--line)}
+.rgrow:first-child{border-top:0}
+.rgrow input[type=number]{width:100%;padding:4px 6px;border:1px solid var(--line-2);border-radius:6px;background:var(--surface);text-align:right}
+.rgrow .cap2{font-size:11px;color:var(--muted)}
+/* supuestos */
+.pgroup{display:flex;flex-direction:column}
+.prow{display:grid;grid-template-columns:minmax(0,1fr) auto 96px;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.prow:first-of-type{border-top:0}
+.prow .pl{display:flex;flex-direction:column;min-width:0}
+.prow .pl span{font-weight:500}
+.prow .pl small{color:var(--muted);font-size:11.5px}
+.prow .pin{display:flex;gap:6px;align-items:center}
+.prow .pin input[type=number]{width:88px;padding:5px 7px;border:1px solid var(--line-2);border-radius:6px;background:var(--surface);text-align:right;font-variant-numeric:tabular-nums}
+.prow .pb{font-size:12px;color:var(--muted);text-align:right}
+.prow.changed .pin input[type=number]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.prow .reset{border:0;background:none;color:var(--accent);cursor:pointer;font-size:12px;padding:0}
+@media (max-width:720px){.prow{grid-template-columns:minmax(0,1fr)}.prow .pb{text-align:left}}
+.gantt text{font-size:11px}
+details summary{cursor:pointer;color:var(--accent);font-weight:500}
+.tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--surface);font-size:12px;padding:6px 9px;border-radius:6px;max-width:260px;line-height:1.35;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.tip b{font-weight:600}
+footer{max-width:1440px;margin:0 auto;padding-block:8px 32px;color:var(--muted);font-size:12px;display:flex;gap:12px;flex-wrap:wrap;justify-content:space-between}
+@media (prefers-reduced-motion: no-preference){.kpi .val,.mini b{transition:color .2s}}
+@media (max-width:640px){.sec-head h2{font-size:23px}.kpi .val{font-size:22px}.top-actions{margin-left:0}}
+</style>
+
+<header class="top"><div class="top-in wrap">
+  <div class="brand">
+    <span class="wordmark">Bio<em>M</em></span>
+    <div class="ttl"><b>El Remanso · Diseño del sistema</b><span>Rotación agrícola-ganadera, balance forrajero y recría · Familia Hermida</span></div>
+  </div>
+  <div class="top-actions">
+    <div class="seg" role="group" aria-label="Escenario de pastura">
+      <button id="sc-obj" aria-pressed="true">Objetivo</button>
+      <button id="sc-medio" aria-pressed="false">Año medio</button>
+    </div>
+    <span id="status" class="status" data-tip=""><i class="dot"></i><span id="status-t">Datos de la planilla</span></span>
+    <button id="reload" class="btn" type="button" title="Volver a leer la planilla">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2.5v3h-3"/></svg>Releer</button>
+    <button id="theme" class="btn icon" type="button" aria-label="Cambiar a modo oscuro" title="Claro / oscuro">
+      <svg class="i-moon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M13.5 9.5A5.5 5.5 0 0 1 6.5 2.5a5.5 5.5 0 1 0 7 7z"/></svg>
+      <svg class="i-sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.4 1.4M11.6 11.6L13 13M3 13l1.4-1.4M11.6 4.4L13 3"/></svg></button>
+    <a id="sheet-link" class="btn primary" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2.5" y="2.5" width="11" height="11" rx="1.5"/><path d="M2.5 6.5h11M2.5 10h11M6.5 6.5v7"/></svg>Abrir Google Sheet</a>
+  </div>
+</div></header>
+<nav class="tabs"><div class="tabs-in wrap" role="tablist" id="tabs"></div></nav>
+
+<div class="layout wrap">
+  <aside class="levers" id="levers"></aside>
+  <main id="main"></main>
+</div>
+<footer class="wrap"><span id="foot-src"></span><span>El tablero replica las fórmulas de la planilla. Lo que se cambie acá no modifica la planilla.</span></footer>
+<div id="tip" class="tip" hidden></div>
+<script>
+// ===== Snapshot del Google Sheet "Remanso_Rotacion_Balance_Forrajero_10" =====
+const SHEET = {
+  source: 'Google Sheet · Remanso_Rotacion_Balance_Forrajero_10 (versión 10)',
+  sheetUrl: 'https://docs.google.com/spreadsheets/d/1GIOCyu56xpe9lZh3VC6Xgu1tYyONbW8P5KAB3XblnOg/edit',
+  readAt: '16/10/2026 17:10',
+  campaigns: ['26/27', '27/28', '28/29', '29/30', '30/31', '31/32', '32/33', '33/34', '34/35'],
+  rotation: [
+    { id: '1', dis: '1A', amb: 'Loma', ha: 11.11, unidad: 'Loma · ciclo 9 · PP1 28/29', crops: ['Cebada/Soja 2da', 'Maíz grano', 'Maíz silo', 'Girasol', 'Maíz grano', 'Girasol', 'PP 1', 'PP 2', 'PP 3'] },
+    { id: '2', dis: '1B', amb: 'Loma', ha: 9.99, unidad: 'Loma · ciclo 9 · PP1 29/30', crops: ['Cebada/Soja 2da', 'Maíz grano', 'Girasol', 'Cebada/Soja 2da', 'Maíz grano', 'Girasol', 'Maíz silo', 'PP 1', 'PP 2'] },
+    { id: '3', dis: '2A', amb: 'Loma', ha: 9.40, unidad: 'Loma · ciclo 9 · PP1 32/33', crops: ['Cebada/Soja 2da', 'Maíz grano', 'Girasol', 'PP 1', 'PP 2', 'PP 3', 'PP 4', 'Maíz silo', 'Girasol'] },
+    { id: '4', dis: '2B', amb: 'Loma', ha: 9.53, unidad: 'Loma · ciclo 9 · PP1 33/34', crops: ['Cebada/Soja 2da', 'Maíz grano', 'Girasol', 'Maíz silo', 'PP 1', 'PP 2', 'PP 3', 'PP 4', 'Maíz silo'] },
+    { id: '5', dis: '3', amb: 'Loma', ha: 9.29, unidad: 'Loma · ciclo 9 · PP1 34/35', crops: ['Cebada/Soja 2da', 'Maíz grano', 'Girasol', 'Cebada/Soja 2da', 'Maíz grano', 'Girasol', 'PP 1', 'PP 2', 'PP 3'] },
+    { id: '6', dis: '4A', amb: 'Media loma', ha: 9.82, unidad: 'ML/Bajo · ciclo 8 · PP1 26/27', crops: ['PP 1', 'PP 2', 'PP 3', 'PP 4', 'Maíz grano', 'Girasol', 'Cebada/Soja 2da', 'Maíz grano', 'Girasol'] },
+    { id: '7', dis: '4B', amb: 'Media loma', ha: 12.73, unidad: 'ML/Bajo · ciclo 8 · PP1 26/27', crops: ['PP 1', 'PP 2', 'PP 3', 'PP 4', 'Maíz silo', 'Girasol', 'Maíz grano', 'Girasol', 'PP 1'] },
+    { id: '8', dis: '5', amb: 'Bajo', ha: 16.49, unidad: 'ML/Bajo · ciclo 8 · PP1 28/29', crops: ['Maíz silo', 'Girasol', 'PP 1', 'PP 2', 'PP 3', 'PP 4', 'Maíz grano', 'Girasol', 'Maíz grano'] },
+    { id: '9 A', dis: '6', amb: 'Bajo', ha: 7.52, unidad: 'Bajo', crops: ['Maíz silo', 'Girasol', 'PP 1', 'PP 2', 'PP 3', 'PP 4', 'Maíz grano', 'Girasol', 'Maíz grano'] },
+    { id: '9 B', dis: '6', amb: 'Pastizal', ha: 9.00, unidad: 'pastizal · sin rotación', crops: ['pastizal', 'pastizal', 'pastizal', 'pastizal', 'pastizal', 'pastizal', 'pastizal', 'pastizal', 'pastizal'] },
+    { id: '10', dis: '7', amb: 'Media loma', ha: 14.02, unidad: 'ML/Bajo · ciclo 8 · PP1 32/33', crops: ['Girasol', 'PP 1', 'PP 2', 'PP 3', 'PP 4', 'Maíz grano', 'Girasol', 'Maíz grano', 'Girasol'] },
+    { id: '11', dis: '8', amb: 'Media loma', ha: 18.15, unidad: 'ML/Bajo · ciclo 8 · PP1 30/31', crops: ['Girasol', 'PP 1', 'PP 2', 'PP 3', 'PP 4', 'Maíz silo', 'Girasol', 'Maíz grano', 'Girasol'] },
+    { id: '12', dis: '9', amb: 'Media loma', ha: 18.23, unidad: 'ML/Bajo · ciclo 8 · PP1 31/32', crops: ['Girasol', 'Maíz grano', 'Girasol', 'Maíz grano', 'Girasol', 'PP 1', 'PP 2', 'PP 3', 'PP 4'] },
+    { id: '13', dis: '10', amb: 'Bajo', ha: 16.72, unidad: 'ML/Bajo · ciclo 8 · PP1 27/28', crops: ['Girasol', 'Maíz silo', 'Girasol', 'Maíz grano', 'Girasol', 'PP 1', 'PP 2', 'PP 3', 'PP 4'] },
+  ],
+  raigras: { obj: [0, 39.4, 0, 0, 0, 0, 33.6, 8.1, 0], medio: [0, 21.1, 0, 0, 0, 0, 29.8, 6.6, 0] },
+  parcelas: [
+    ['Lote 1 (1A)', 10.67, 4, '1 x 4', '2,55 a 2,83', 1.27, 534],
+    ['Lote 2 (1B)', 9.99, 4, '1 x 4', '2,40 a 2,59', 1.18, 505],
+    ['Lote 3 (2A)', 9.42, 4, '1 x 4', '2,28 a 2,44', 1.57, 480],
+    ['Lote 4 (2B)', 9.28, 4, '1 x 4', '2,00 a 2,57', 1.16, 495],
+    ['Lote 5 (3)', 9.29, 4, '1 x 4', '2,21 a 2,66', 1.75, 586],
+    ['Lote 6 (4A)', 9.36, 4, '1 x 4', '2,11 a 2,57', 1.23, 492],
+    ['Lote 7 (4B)', 11.88, 5, '1 x 5', '2,12 a 2,78', 1.37, 566],
+    ['Lote 8 (5)', 15.86, 6, '2 x 3', '2,00 a 2,96', 1.56, 1155],
+    ['Lote 9 (6)', 16.52, 6, '1 x 6', '2,61 a 2,98', 2.58, 1116],
+    ['Lote 10 (7)', 12.63, 5, '1 x 5', '2,36 a 2,76', 1.43, 690],
+    ['Lote 11 (8)', 17.74, 6, '1 x 6', '2,86 a 3,13', 1.43, 995],
+    ['Lote 12 (9)', 18.02, 7, '1 x 7', '2,39 a 2,75', 1.39, 1083],
+    ['Lote 13 (10)', 16.72, 6, '1 x 6', '2,65 a 2,84', 2.34, 739],
+  ],
+  aguaTexto: { distancia: '229 m mediana / 330 m máxima', forma: 'largo ≤ 4-5 veces el ancho' },
+  // Valores calculados por la planilla, para verificar que el tablero replica sus fórmulas
+  check: {
+    obj: { design: 254.1064224, carne: 46352.49686, kgha: 491.419334, ev: 1.870684015, retd: 62.88529909, supg: 94.32371429 },
+    medio: { design: 220.7620186, carne: 39798.33773, kgha: 423.2926495, ev: 1.606493359 },
+    cyvHeads: [189, 254, 254, 254, 254, 254, 254, 254, 254],
+    cyvRet: [0, 40, 75, 83, 63, 78, 66, 62, 69],
+    cyvDif: [121839000, 174920000, 184370000, 186530000, 181130000, 185180000, 181940000, 180860000, 182750000],
+    pico: 317.633028,
+  },
+};
+
+// Parámetros: [clave, grupo, etiqueta, valor de la planilla, unidad, formato, min, max, paso, fuente]
+const PARAM_DEFS = [
+  ['adg', 'Recría', 'Aumento diario de peso, promedio anual', 0.6, 'kg/día', 'n2', 0.3, 1.0, 0.05, 'Definido por el usuario. Es el promedio del año: en invierno será menor y en primavera mayor.'],
+  ['wCab', 'Recría', 'Peso de compra · cabeza', 220, 'kg', 'n0', 150, 300, 5, 'Definido por el usuario.'],
+  ['wCue', 'Recría', 'Peso de compra · cuerpo', 200, 'kg', 'n0', 140, 280, 5, 'Definido por el usuario.'],
+  ['wCol', 'Recría', 'Peso de compra · cola', 180, 'kg', 'n0', 120, 260, 5, 'Definido por el usuario.'],
+  ['sCab', 'Recría', 'Reparto del lote · cabeza', 0.25, '%', 'p0', 0, 1, 0.05, 'Supuesto: reparto típico de un lote clasificado por peso. Los tres suman 100%.'],
+  ['sCue', 'Recría', 'Reparto del lote · cuerpo', 0.5, '%', 'p0', 0, 1, 0.05, 'Supuesto. Mover el reparto cambia menos del 3% la carne total.'],
+  ['sCol', 'Recría', 'Reparto del lote · cola', 0.25, '%', 'p0', 0, 1, 0.05, 'Supuesto. Los tres suman 100%.'],
+  ['overlap', 'Recría', 'Días de superposición con la cabeza del año anterior', 30, 'días', 'n0', 0, 60, 5, 'Recomendación: 30 días (todo abril). Deja el invierno con un solo grupo.'],
+  ['cons', 'Recría', 'Consumo diario como % del peso vivo', 0.028, '% PV', 'p1', 0.02, 0.035, 0.001, 'Novillo de 300 kg = 8,4 kg MS/día. INTA usa 2,5 a 3,0% para recría.'],
+  ['retDays', 'Recría', 'Días que el cuerpo retenido pasa el verano', 90, 'días', 'n0', 0, 120, 5, 'Del 1 de diciembre al 1 de marzo. Es el grupo que se come el excedente estival.'],
+  ['ppObj', 'Pastura', 'Producción · escenario objetivo', 12000, 'kg MS/ha/año', 'n0', 6000, 15000, 250, 'Definido por el usuario. Es el decil superior, no el promedio.'],
+  ['ppMed', 'Pastura', 'Producción · escenario año medio', 9500, 'kg MS/ha/año', 'n0', 6000, 15000, 250, 'INTA CEI Barrow: alfalfa+festuca+cebadilla en secano, 4 años, 9.425 kg MS/ha.'],
+  ['ppS0', 'Pastura', '% de la producción en primavera (sep-nov)', 0.45, '%', 'p0', 0, 1, 0.01, 'Síntesis sobre Castaño 2003 (INTA Balcarce).'],
+  ['ppS1', 'Pastura', '% en verano (dic-feb)', 0.25, '%', 'p0', 0, 1, 0.01, 'Estimación propia sobre Bruno 1987 e INIA La Estanzuela.'],
+  ['ppS2', 'Pastura', '% en otoño (mar-may)', 0.2, '%', 'p0', 0, 1, 0.01, 'Castaño 2003, INTA Balcarce.'],
+  ['ppS3', 'Pastura', '% en invierno (jun-ago)', 0.1, '%', 'p0', 0, 1, 0.01, 'Agnusdei et al. 2001, INTA Balcarce.'],
+  ['ppE0', 'Pastura', 'Eficiencia de cosecha en primavera', 0.6, '%', 'p0', 0.3, 0.9, 0.05, 'Quinodoz et al. 2022 (INTA Paraná, 8 años).'],
+  ['ppE1', 'Pastura', 'Eficiencia de cosecha en verano', 0.5, '%', 'p0', 0.3, 0.9, 0.05, 'Quinodoz et al. 2022.'],
+  ['ppE2', 'Pastura', 'Eficiencia de cosecha en otoño', 0.7, '%', 'p0', 0.3, 0.9, 0.05, 'Quinodoz et al. 2022.'],
+  ['ppE3', 'Pastura', 'Eficiencia de cosecha en invierno', 0.7, '%', 'p0', 0.3, 0.9, 0.05, 'Ídem.'],
+  ['pp1Factor', 'Pastura', 'Producción de la pastura en su 1er año (PP 1)', 0.7, '% de una adulta', 'p0', 0.3, 1, 0.05, 'Valor definido por el usuario.'],
+  ['pp1SpringFrac', 'Pastura', 'Fracción de la primavera en que produce la PP 1', 0.6667, '%', 'p0', 0, 1, 0.0333, 'La PP 1 empieza a producir en octubre. Septiembre queda sin pastoreo.'],
+  ['pzProd', 'Pastizal', 'Producción del pastizal', 4000, 'kg MS/ha/año', 'n0', 1500, 8000, 250, 'Supuesto propio. No hay dato del campo ni ensayo local.'],
+  ['pzS0', 'Pastizal', '% en primavera', 0.3, '%', 'p0', 0, 1, 0.05, 'Pastizal natural de crecimiento estival.'],
+  ['pzS1', 'Pastizal', '% en verano', 0.4, '%', 'p0', 0, 1, 0.05, 'Ídem.'],
+  ['pzS2', 'Pastizal', '% en otoño', 0.2, '%', 'p0', 0, 1, 0.05, 'Ídem.'],
+  ['pzS3', 'Pastizal', '% en invierno', 0.1, '%', 'p0', 0, 1, 0.05, 'Ídem.'],
+  ['pzEff', 'Pastizal', 'Eficiencia de utilización', 0.4, '%', 'p0', 0.2, 0.8, 0.05, 'Supuesto propio: baja selectividad y mucho material muerto.'],
+  ['avProd', 'Avena', 'Avena sobre rastrojo de maíz silo · producción', 5500, 'kg MS/ha', 'n0', 2000, 9000, 250, 'Moreyra et al. 2014 (INTA Bordenave).'],
+  ['avOto', 'Avena', '% en otoño', 0.45, '%', 'p0', 0, 1, 0.05, 'Bertín et al. 2019 (INTA Pergamino). Sembrada en marzo.'],
+  ['avInv', 'Avena', '% en invierno', 0.35, '%', 'p0', 0, 1, 0.05, 'Duhalde 2002 (INTA Barrow).'],
+  ['avPrim', 'Avena', '% en primavera', 0.2, '%', 'p0', 0, 1, 0.05, 'Duhalde 2002.'],
+  ['avEff', 'Avena', 'Eficiencia de utilización', 0.65, '%', 'p0', 0.3, 0.9, 0.05, 'Quinodoz et al. 2022.'],
+  ['rgProd', 'Raigrás', 'Raigrás al voleo en maíz para grano · producción', 3000, 'kg MS/ha', 'n0', 1000, 8000, 250, 'Estimación de baja confianza. Bien sembrado da 6.500-8.000; al voleo dentro del cultivo, 40-50% de eso.'],
+  ['rgOto', 'Raigrás', '% en otoño', 0.15, '%', 'p0', 0, 1, 0.05, 'El maíz se cosecha en abril-mayo; hasta entonces el raigrás está bajo el canopeo.'],
+  ['rgInv', 'Raigrás', '% en invierno', 0.4, '%', 'p0', 0, 1, 0.05, 'Mejor productividad invernal que la avena (INTA C. del Uruguay).'],
+  ['rgPrim', 'Raigrás', '% en primavera', 0.45, '%', 'p0', 0, 1, 0.05, 'Concentra la producción a la salida del invierno y en primavera.'],
+  ['rgEff', 'Raigrás', 'Eficiencia de utilización', 0.65, '%', 'p0', 0.3, 0.9, 0.05, 'Igual criterio que la avena.'],
+  ['occPP', 'Ocupación', 'Pastura perenne (PP 1 a PP 4)', 1, '% del año', 'p0', 0, 1, 0.05, 'Todo el año y todo el lote.'],
+  ['occPz', 'Ocupación', 'Pastizal', 1, '% del año', 'p0', 0, 1, 0.05, 'Pastoreo permanente, no rota.'],
+  ['occSilo', 'Ocupación', 'Maíz silo', 0, '% del año', 'p0', 0, 1, 0.05, 'En cero por decisión del usuario: el silaje entra como oferta, pero el animal no pastorea esa hectárea.'],
+  ['occAv', 'Ocupación', 'Avena sobre rastrojo de maíz silo', 0.55, '% del año', 'p0', 0, 1, 0.05, 'De fines de marzo a mediados de octubre: 6,5 meses de 12.'],
+  ['occRg', 'Ocupación', 'Raigrás voleado en maíz a grano', 0.4, '% del año', 'p0', 0, 1, 0.05, 'De la cosecha (abril-mayo) a la siembra (octubre): unos 4,5 meses de 12.'],
+  ['siloProd', 'Reservas', 'Silaje de maíz planta entera', 12000, 'kg MS/ha', 'n0', 6000, 18000, 250, 'Chacra Exp. Chascomús 2012/13, secano, 13 híbridos.'],
+  ['siloEff', 'Reservas', 'Aprovechamiento del silaje', 0.8, '%', 'p0', 0.5, 1, 0.05, 'Fernández Mayer (INTA Bordenave).'],
+  ['rolloEff', 'Reservas', 'Aprovechamiento del rollo de pastura', 0.75, '%', 'p0', 0.5, 1, 0.05, 'Supuesto propio, algo menor que el silo.'],
+  ['springGraze', 'Reservas', '% de la primavera de la pastura que se pastorea', 0.85, '%', 'p0', 0.5, 1, 0.05, 'Definido por el usuario. El resto se conserva como rollo.'],
+  ['evKg', 'Reservas', 'Consumo de 1 EV', 10, 'kg MS/día', 'n0', 8, 12, 0.5, 'Sólo para expresar la carga en EV.'],
+  ['priceBuy', 'Precios', 'Precio de compra · ternero', 6000, '$/kg vivo', 'm0', 3000, 9000, 100, 'Definido por el usuario. Se aplica a cabeza, cuerpo y cola.'],
+  ['priceSell', 'Precios', 'Precio de venta · novillito', 5000, '$/kg vivo', 'm0', 3000, 9000, 100, 'Definido por el usuario. Se aplica a todas las ventas.'],
+  ['ocup', 'Pastoreo', 'Días de ocupación por parcela', 3, 'días', 'n0', 1, 7, 1, 'Voisin: 3 días es el máximo de la 4ª ley.'],
+  ['rotEff', 'Pastoreo', 'Eficiencia de cosecha con esa ocupación', 0.6, '%', 'p0', 0.4, 1, 0.05, 'Balda, INTA Cuenca del Salado 2015: ½ día 100% · 1 día 90% · 3 días 60% · 7 días 50%.'],
+  ['desc0', 'Pastoreo', 'Descanso de la pastura en primavera', 30, 'días', 'n0', 15, 60, 1, 'Rango de referencia 25 a 35. Construcción sobre Bertín 2019 y Agnusdei et al.'],
+  ['desc1', 'Pastoreo', 'Descanso en verano', 35, 'días', 'n0', 15, 70, 1, 'Rango de referencia 30 a 40.'],
+  ['desc2', 'Pastoreo', 'Descanso en otoño', 50, 'días', 'n0', 20, 90, 1, 'Rango de referencia 40 a 60.'],
+  ['desc3', 'Pastoreo', 'Descanso en invierno', 80, 'días', 'n0', 30, 120, 1, 'Rango de referencia 70 a 90.'],
+  ['waterL', 'Pastoreo', 'Consumo de agua por animal (verano)', 50, 'L/día', 'n0', 30, 80, 5, 'Sager, INTA San Luis: novillo de 400 kg ~40 L/día. Se usan 50 por seguridad.'],
+];
+
+function paramsFrom(values) {
+  const v = values;
+  return {
+    adg: v.adg, wCab: v.wCab, wCue: v.wCue, wCol: v.wCol, sCab: v.sCab, sCue: v.sCue, sCol: v.sCol,
+    overlap: v.overlap, cons: v.cons, retDays: v.retDays, ppObj: v.ppObj, ppMed: v.ppMed,
+    ppS: [v.ppS0, v.ppS1, v.ppS2, v.ppS3], ppEff: [v.ppE0, v.ppE1, v.ppE2, v.ppE3],
+    pp1Factor: v.pp1Factor, pp1SpringFrac: v.pp1SpringFrac,
+    pzProd: v.pzProd, pzS: [v.pzS0, v.pzS1, v.pzS2, v.pzS3], pzEff: v.pzEff,
+    avProd: v.avProd, avOto: v.avOto, avInv: v.avInv, avPrim: v.avPrim, avEff: v.avEff,
+    rgProd: v.rgProd, rgOto: v.rgOto, rgInv: v.rgInv, rgPrim: v.rgPrim, rgEff: v.rgEff,
+    occPP: v.occPP, occPz: v.occPz, occSilo: v.occSilo, occAv: v.occAv, occRg: v.occRg,
+    siloProd: v.siloProd, siloEff: v.siloEff, rolloEff: v.rolloEff, springGraze: v.springGraze, evKg: v.evKg,
+    priceBuy: v.priceBuy, priceSell: v.priceSell,
+    ocup: v.ocup, rotEff: v.rotEff, descanso: [v.desc0, v.desc1, v.desc2, v.desc3], waterL: v.waterL,
+  };
+}
+if (typeof module !== 'undefined') module.exports = { SHEET, PARAM_DEFS, paramsFrom };
+
+// ===== Modelo El Remanso — réplica de las fórmulas del Google Sheet =====
+// SHEET: snapshot de datos de entrada. P: parámetros (editables). ROT: rotación (editable). RG: ha de raigrás por escenario.
+const SEASONS = ['Primavera', 'Verano', 'Otoño', 'Invierno'];
+const SDAYS = [91, 90, 92, 92];
+const DESIGN_IDX = [2, 3, 4, 5, 6, 7, 8]; // 28/29 a 34/35
+
+function computeModel(P, ROT, RG, scenario) {
+  const nC = ROT[0].crops.length;
+  const lastJ = nC - 1;
+  const totalHa = ROT.reduce((a, l) => a + l.ha, 0);
+  // ---------- Superficies ----------
+  const sum = (j, pred) => ROT.reduce((a, l) => a + (pred(l.crops[j], l, j) ? l.ha : 0), 0);
+  const avenaOn = (l, j) => l.crops[j] === 'Maíz silo' && (j === lastJ || (!String(l.crops[j + 1]).startsWith('PP') && !String(l.crops[j + 1]).startsWith('Cebada')));
+  const nichoOn = (l, j) => j < lastJ && l.crops[j] === 'Maíz grano' && ['Maíz grano', 'Maíz silo', 'Girasol'].includes(l.crops[j + 1]);
+  const S = [];
+  for (let j = 0; j < nC; j++) {
+    const s = {};
+    ['PP 1', 'PP 2', 'PP 3', 'PP 4', 'pastizal', 'Maíz grano', 'Maíz silo', 'Girasol', 'Cebada/Soja 2da'].forEach(k => s[k] = sum(j, c => c === k));
+    s.past = s['PP 1'] + s['PP 2'] + s['PP 3'] + s['PP 4'];
+    s.pp1 = s['PP 1'];
+    s.pz = s['pastizal'];
+    s.silo = s['Maíz silo'];
+    s.avena = ROT.reduce((a, l) => a + (avenaOn(l, j) ? l.ha : 0), 0);
+    s.nichos = ROT.reduce((a, l) => a + (nichoOn(l, j) ? l.ha : 0), 0);
+    s.total = totalHa;
+    s.pctPast = s.past / (totalHa - ROT.filter(l => l.crops.every(c => c === 'pastizal')).reduce((a, l) => a + l.ha, 0));
+    S.push(s);
+  }
+  // ---------- Recría ----------
+  const a = P.adg;
+  const D = { cab: 365 + P.overlap, cue: 244, ret: 244 + P.retDays, col: 244 };
+  const F = { cab: P.wCab + a * D.cab, cue: P.wCue + a * D.cue, ret: P.wCue + a * D.ret, col: P.wCol + a * D.col };
+  const G = { cab: a * D.cab, cue: a * D.cue, ret: a * D.ret, col: a * D.col };
+  const tr = (w, s0, s1, days) => (w + a * (s0 + s1) / 2) * P.cons * days;
+  const tramos = [
+    ['Cabeza', 'Abr-may, año 1', 2, 61, 0, 61, P.wCab, P.sCab],
+    ['Cabeza', 'Jun-ago, año 1', 3, 92, 61, 153, P.wCab, P.sCab],
+    ['Cabeza', 'Sep-nov, año 1', 0, 91, 153, 244, P.wCab, P.sCab],
+    ['Cabeza', 'Dic-feb', 1, 90, 244, 334, P.wCab, P.sCab],
+    ['Cabeza', 'Mar + superposición', 2, 31 + P.overlap, 334, 365 + P.overlap, P.wCab, P.sCab],
+    ['Cuerpo', 'Abr-may', 2, 61, 0, 61, P.wCue, P.sCue],
+    ['Cuerpo', 'Jun-ago', 3, 92, 61, 153, P.wCue, P.sCue],
+    ['Cuerpo', 'Sep-nov', 0, 91, 153, 244, P.wCue, P.sCue],
+    ['Cola', 'Abr-may', 2, 61, 0, 61, P.wCol, P.sCol],
+    ['Cola', 'Jun-ago', 3, 92, 61, 153, P.wCol, P.sCol],
+    ['Cola', 'Sep-nov', 0, 91, 153, 244, P.wCol, P.sCol],
+  ].map(([cat, tramo, season, days, d0, d1, w, share]) => ({ cat, tramo, season, days, d0, d1, share, peso: w + a * (d0 + d1) / 2, kg: tr(w, d0, d1, days) }));
+  const cons = [0, 0, 0, 0];
+  tramos.forEach(t => cons[t.season] += t.kg * t.share);
+  const consTot = cons.reduce((x, y) => x + y, 0);
+  const H14 = tramos[3].kg; // cabeza dic-feb
+  const retCons = (P.wCue + a * 244 + P.wCue + a * (244 + P.retDays)) / 2 * P.cons * P.retDays;
+  const retGain = a * P.retDays;
+  const kgAnimal = G.cab * P.sCab + G.cue * P.sCue + G.col * P.sCol;
+  const conversion = consTot / kgAnimal;
+  // ---------- Balance forrajero ----------
+  const prod = scenario === 'medio' ? P.ppMed : P.ppObj;
+  const f = P.pp1SpringFrac;
+  const pp1S = [P.ppS[0] * f / (P.ppS[0] * f + P.ppS[1]), P.ppS[1] / (P.ppS[0] * f + P.ppS[1]), 0, 0];
+  const avS = [P.avPrim, 0, P.avOto, P.avInv];
+  const rgS = [P.rgPrim, 0, P.rgOto, P.rgInv];
+  const B = S.map((s, j) => {
+    const rg = RG[j] || 0;
+    const adult = s.past - s.pp1;
+    const pastProd = k => (adult * P.ppS[k] + s.pp1 * P.pp1Factor * pp1S[k]) * prod;
+    const offer = [0, 1, 2, 3].map(k =>
+      pastProd(k) * P.ppEff[k] * (k === 0 ? P.springGraze : 1)
+      + s.pz * P.pzProd * P.pzS[k] * P.pzEff
+      + s.avena * P.avProd * avS[k] * P.avEff
+      + rg * P.rgProd * rgS[k] * P.rgEff);
+    const offerParts = [0, 1, 2, 3].map(k => ({
+      pastura: pastProd(k) * P.ppEff[k] * (k === 0 ? P.springGraze : 1),
+      pastizal: s.pz * P.pzProd * P.pzS[k] * P.pzEff,
+      avena: s.avena * P.avProd * avS[k] * P.avEff,
+      raigras: rg * P.rgProd * rgS[k] * P.rgEff,
+    }));
+    const silaje = s.silo * P.siloProd * P.siloEff;
+    const rollo = pastProd(0) * (1 - P.springGraze) * P.rolloEff;
+    const stored = silaje + rollo;
+    const supports = offer.map((o, k) => o / cons[k]);
+    const cand = supports.map(sk => {
+      let o = 0, c = 0;
+      supports.forEach((si, i) => { if (si <= sk) { o += offer[i]; c += cons[i]; } });
+      return (stored + o) / c;
+    });
+    const maxBuy = Math.min(...cand);
+    const supG = s.past * P.occPP + s.pz * P.occPz + s.silo * P.occSilo + s.avena * P.occAv + rg * P.occRg;
+    return { j, rg, rgOk: rg <= s.nichos + 0.01, offer, offerParts, silaje, rollo, stored, supports, cand, maxBuy, supG, pctG: supG / totalHa };
+  });
+  const design = Math.min(...DESIGN_IDX.map(j => B[j].maxBuy));
+  const bindJ = DESIGN_IDX.reduce((m, j) => B[j].maxBuy < B[m].maxBuy ? j : m, DESIGN_IDX[0]);
+  B.forEach(b => {
+    b.ret = Math.max(0, Math.min(design * P.sCue, (b.offer[1] - design * P.sCab * H14) / retCons));
+    b.demand = [design * cons[0], design * cons[1] + b.ret * retCons, design * cons[2], design * cons[3]];
+    b.saldo = b.offer.map((o, k) => o - b.demand[k]);
+    b.deficit = -b.saldo.filter(x => x < 0).reduce((x, y) => x + y, 0);
+    b.sobra = b.stored - b.deficit;
+    b.cierra = b.sobra >= -1;
+    b.sobrante = b.saldo.filter(x => x > 0).reduce((x, y) => x + y, 0);
+    // séries con la compra posible de esa campaña (para gráficos)
+  });
+  const retD = Math.min(...DESIGN_IDX.map(j => B[j].ret));
+  const carne = design * kgAnimal + retD * retGain;
+  const supDesign = DESIGN_IDX.reduce((x, j) => x + B[j].supG, 0) / DESIGN_IDX.length;
+  const kgHa = carne / supDesign;
+  const kgHaCampo = carne / totalHa;
+  const evAnual = (design * consTot + retD * retCons) / (P.evKg * 365) / supDesign;
+  const evAnualCampo = evAnual * supDesign / totalHa;
+  // ---------- Recría: rodeo mes a mes ----------
+  const cab = design * P.sCab, cue = design * P.sCue, col = design * P.sCol;
+  const months = ['Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre', 'Enero', 'Febrero', 'Marzo'];
+  const mSeason = [2, 2, 3, 3, 3, 0, 0, 0, 1, 1, 1, 2];
+  const herd = months.map((m, i) => {
+    const r = { mes: m, season: mSeason[i], cabNueva: cab, cuerpo: i <= 7 ? cue : (i <= 10 ? retD : 0), cola: i <= 7 ? col : 0, cabVieja: i === 0 ? cab : 0 };
+    r.total = r.cabNueva + r.cuerpo + r.cola + r.cabVieja;
+    return r;
+  });
+  const pico = Math.max(...herd.map(h => h.total));
+  // ---------- Compra y venta ----------
+  const CV = B.map((b, j) => {
+    const heads = Math.floor(Math.min(b.maxBuy, design) + 1e-9);
+    const nCab = Math.round(heads * P.sCab), nCol = Math.round(heads * P.sCol), nCue = heads - nCab - nCol;
+    const kgBuy = nCab * P.wCab + nCue * P.wCue + nCol * P.wCol;
+    const buy = kgBuy * P.priceBuy;
+    const ret = Math.min(nCue, Math.floor(b.ret + 1e-9));
+    const v1h = nCol + nCue - ret, v1kg = nCol * F.col + (nCue - ret) * F.cue;
+    const v2h = ret, v2kg = ret * F.ret;
+    const v3h = nCab, v3kg = nCab * F.cab;
+    const kgSold = v1kg + v2kg + v3kg;
+    const sales = kgSold * P.priceSell;
+    return { j, year: 2026 + j, heads, nCab, nCue, nCol, kgBuy, buy, ret, v1h, v1kg, v1$: v1kg * P.priceSell, v2h, v2kg, v2$: v2kg * P.priceSell, v3h, v3kg, v3$: v3kg * P.priceSell, kgSold, kgProd: kgSold - kgBuy, sales, dif: sales - buy, difHead: heads ? (sales - buy) / heads : 0, indif: kgSold ? buy / kgSold : 0 };
+  });
+  // ---------- Pastoreo rotativo ----------
+  const headsSeason = [design, design * P.sCab + retD, (herd[11].total + herd[0].total + herd[1].total) / 3, design];
+  const demSeason = [design * cons[0], design * cons[1] + retD * retCons, design * cons[2], design * cons[3]];
+  const pastMin = Math.min(...DESIGN_IDX.map(j => S[j].past));
+  const PR = [0, 1, 2, 3].map(k => {
+    const ev = demSeason[k] / (P.evKg * SDAYS[k]);
+    const growth = prod * P.ppS[k] / SDAYS[k];
+    const rebrote = growth * P.descanso[k];
+    const cosech = rebrote * P.rotEff;
+    const parcelas = Math.ceil(P.descanso[k] / P.ocup - 1e-9) + 1;
+    const move = demSeason[k] / SDAYS[k] * P.ocup;
+    const parcelHa = move / cosech;
+    const circuito = parcelas * parcelHa;
+    return { heads: headsSeason[k], dem: demSeason[k], ev, evHa: ev / supDesign, evHaCampo: ev / totalHa, growth, rebrote, cosech, parcelas, move, parcelHa, circuito, pastMin, dieta: Math.min(1, pastMin / circuito) };
+  });
+  const agua = { pico, litros: pico * P.waterL, caudal: pico * 0.2 * P.waterL / 60, frente: pico * 0.2 * 0.3 };
+  // ---------- Controles de rotación ----------
+  const controles = [];
+  ROT.forEach(l => {
+    for (let j = 0; j < nC; j++) {
+      const c = l.crops[j], prev = j > 0 ? l.crops[j - 1] : null;
+      if (c === 'PP 1') controles.push({ tipo: 'antecesor', lote: l, j, prev, ok: prev == null ? null : !String(prev).startsWith('PP') });
+      if (prev && String(prev).startsWith('Maíz') && String(c).startsWith('Maíz')) controles.push({ tipo: 'maiz', lote: l, j, prev, c });
+      if (prev && String(prev).startsWith('PP') && c !== 'PP 1' && String(c).startsWith('PP')) {
+        const n = +String(c).slice(3), np = +String(prev).slice(3);
+        if (n !== np + 1) controles.push({ tipo: 'secuenciaPP', lote: l, j, prev, c });
+      }
+      if (prev && !String(prev).startsWith('PP') && String(c).startsWith('PP') && c !== 'PP 1') controles.push({ tipo: 'secuenciaPP', lote: l, j, prev, c });
+    }
+  });
+  return { S, tramos, cons, consTot, H14, retCons, retGain, kgAnimal, conversion, D, F, G, B, design, bindJ, retD, carne, supDesign, kgHa, kgHaCampo, evAnual, evAnualCampo, herd, pico, CV, PR, agua, controles, prod, totalHa };
+}
+if (typeof module !== 'undefined') module.exports = { computeModel, SEASONS, SDAYS, DESIGN_IDX };
+
+(function () {
+'use strict';
+// ================= utilidades =================
+const $ = s => document.querySelector(s);
+const NF = {};
+const nf = d => NF[d] || (NF[d] = new Intl.NumberFormat('es-AR', { minimumFractionDigits: d, maximumFractionDigits: d }));
+const z = (v, d) => (Math.abs(v) < 0.5 * Math.pow(10, -d) ? 0 : v);
+const f0 = v => nf(0).format(z(v, 0)), f1 = v => nf(1).format(z(v, 1)), f2 = v => nf(2).format(z(v, 2));
+const pct = (v, d = 0) => nf(d).format(v * 100) + '%';
+const money = v => '$ ' + f0(v);
+const mill = v => '$ ' + nf(v >= 1e9 ? 2 : 1).format(v / 1e6) + ' M';
+const tn = v => nf(1).format(v / 1000) + ' t';
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const FMT = { n0: f0, n1: f1, n2: f2, p0: v => pct(v), p1: v => pct(v, 1), m0: money };
+const deep = o => JSON.parse(JSON.stringify(o));
+const sumA = a => a.reduce((x, y) => x + y, 0);
+const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+
+const CAMP = SHEET.campaigns;
+const CROPS = ['PP 1', 'PP 2', 'PP 3', 'PP 4', 'Maíz grano', 'Maíz silo', 'Girasol', 'Cebada/Soja 2da', 'pastizal'];
+const CROP_STYLE = {
+  'PP 1': ['#d3ebd6', '#1d4d2b', 'PP 1'], 'PP 2': ['#a5d4ad', '#173f23', 'PP 2'], 'PP 3': ['#5fae6f', '#ffffff', 'PP 3'], 'PP 4': ['#2f7d43', '#ffffff', 'PP 4'],
+  'Maíz grano': ['#f3c548', '#4a3500', 'Maíz grano'], 'Maíz silo': ['#d9822b', '#ffffff', 'Maíz silo'], 'Girasol': ['#fbe7a1', '#5a4300', 'Girasol'],
+  'Cebada/Soja 2da': ['#9cc3e8', '#123a5e', 'Ceb./Soja 2ª'], 'pastizal': ['#c9d3a3', '#3f4a1c', 'Pastizal'],
+};
+const SEAS = SEASONS;
+const SCOL = ['var(--s-prim)', 'var(--s-ver)', 'var(--s-oto)', 'var(--s-inv)'];
+
+// ================= estado =================
+const baseVals = Object.fromEntries(PARAM_DEFS.map(d => [d[0], d[3]]));
+const DEF = Object.fromEntries(PARAM_DEFS.map(d => [d[0], { key: d[0], group: d[1], label: d[2], unit: d[4], fmt: d[5], min: d[6], max: d[7], step: d[8], src: d[9] }]));
+const ST = {
+  base: { ...baseVals }, vals: { ...baseVals }, touched: new Set(),
+  rotBase: deep(SHEET.rotation), rot: deep(SHEET.rotation), rotTouched: new Set(),
+  rgBase: deep(SHEET.raigras), rg: deep(SHEET.raigras), rgTouched: { obj: new Set(), medio: new Set() },
+  parcelas: SHEET.parcelas, scenario: 'obj', tab: store.get('remanso.tab') || 'resumen', camp: null,
+  live: { status: 'snapshot', at: SHEET.readAt, msg: '' },
+};
+const TABS = [['resumen', 'Resumen'], ['rotacion', 'Rotación'], ['balance', 'Balance forrajero'], ['recria', 'Recría'], ['cyv', 'Compra y venta'], ['pastoreo', 'Pastoreo y agua'], ['supuestos', 'Supuestos']];
+if (!TABS.some(t => t[0] === ST.tab)) ST.tab = 'resumen';
+
+function run(useBase) {
+  const sc = ST.scenario;
+  const vals = useBase ? ST.base : ST.vals;
+  return computeModel(paramsFrom(vals), useBase ? ST.rotBase : ST.rot, (useBase ? ST.rgBase : ST.rg)[sc], sc);
+}
+function isModified() { return ST.touched.size > 0 || ST.rotTouched.size > 0 || ST.rgTouched[ST.scenario].size > 0; }
+
+// ================= gráficos SVG =================
+function niceStep(v) {
+  if (v <= 0) return 1;
+  const e = Math.pow(10, Math.floor(Math.log10(v))); const m = v / e;
+  return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 5 ? 5 : 10) * e;
+}
+function bars(o) {
+  // o: {cats, series:[{name,color,values}], stacked, h, fmt, axisFmt, lines:[{v,label}], markers:{values,label}, dim:[idx], hl:[idx], valueLabels}
+  const W = 640, H = o.h || 240, L = 54, R = 10, T = 18, B = 30;
+  const n = o.cats.length, pw = W - L - R, ph = H - T - B;
+  const totals = o.cats.map((_, i) => o.stacked ? sumA(o.series.map(s => Math.max(0, s.values[i] || 0))) : Math.max(...o.series.map(s => s.values[i] || 0)));
+  let mx = Math.max(...totals, ...(o.lines || []).map(l => l.v), ...((o.markers && o.markers.values) || [0]));
+  const step = niceStep(mx * 1.08 / 4); const nT = Math.max(1, Math.ceil(mx * 1.08 / step)); mx = step * nT;
+  const y = v => T + ph - (v / mx) * ph;
+  const band = pw / n; const gap = Math.min(18, band * 0.28);
+  const bw = band - gap; const ns = o.stacked ? 1 : o.series.length; const sw = bw / ns;
+  const af = o.axisFmt || o.fmt || f0;
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.aria || '')}">`;
+  for (let k = 0; k <= nT; k++) { const v = step * k, yy = y(v); s += `<line class="${k ? 'grid' : 'base'}" x1="${L}" x2="${W - R}" y1="${yy}" y2="${yy}"/><text x="${L - 6}" y="${yy + 4}" text-anchor="end">${af(v)}</text>`; }
+  o.cats.forEach((c, i) => {
+    const x0 = L + i * band + gap / 2; const dim = o.dim && o.dim.includes(i);
+    let acc = 0;
+    o.series.forEach((se, si) => {
+      const v = Math.max(0, se.values[i] || 0); if (!v) return;
+      const x = o.stacked ? x0 : x0 + si * sw; const w = o.stacked ? bw : sw - (ns > 1 ? 2 : 0);
+      const y1 = o.stacked ? y(acc + v) : y(v), y2 = o.stacked ? y(acc) : y(0);
+      const tip = `<b>${esc(c)}</b> · ${esc(se.name)}<br>${o.fmt ? o.fmt(v) : f0(v)}`;
+      s += `<rect class="m" x="${x.toFixed(1)}" y="${y1.toFixed(1)}" width="${Math.max(1, w).toFixed(1)}" height="${Math.max(0, y2 - y1).toFixed(1)}" rx="2" fill="${se.color}" opacity="${dim ? 0.38 : 1}" data-tip="${esc(tip)}"/>`;
+      if (o.stacked) acc += v;
+    });
+    if (o.valueLabels) { const t = totals[i]; s += `<text class="lab" x="${(x0 + bw / 2).toFixed(1)}" y="${(y(t) - 5).toFixed(1)}" text-anchor="middle">${(o.labelFmt || o.fmt || f0)(t)}</text>`; }
+    if (o.markers) {
+      const mv = o.markers.values[i]; if (mv != null) { const yy = y(mv); s += `<line x1="${(x0 - 3).toFixed(1)}" x2="${(x0 + bw + 3).toFixed(1)}" y1="${yy}" y2="${yy}" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round" data-tip="${esc(`<b>${c}</b> · ${o.markers.label}<br>${(o.fmt || f0)(mv)}`)}"/>`; }
+    }
+    const hl = o.hl && o.hl.includes(i);
+    s += `<text x="${(x0 + bw / 2).toFixed(1)}" y="${H - 10}" text-anchor="middle" ${hl ? 'class="lab"' : ''}>${esc(c)}</text>`;
+  });
+  (o.lines || []).forEach(l => { const yy = y(l.v); s += `<line class="ref" x1="${L}" x2="${W - R}" y1="${yy}" y2="${yy}" data-tip="${esc(l.label)}"/>`; });
+  return s + '</svg>';
+}
+function legend(items) { return `<div class="legend">${items.map(([n, c, shape]) => `<span><i style="background:${c};${shape === 'line' ? 'height:3px;border-radius:2px' : ''}"></i>${esc(n)}</span>`).join('')}</div>`; }
+function delta(cur, base, fmt, betterUp = true, unit = '') {
+  if (!isModified()) return '';
+  const d = cur - base; const rel = base ? d / Math.abs(base) : 0;
+  if (Math.abs(rel) < 0.0005) return `<span class="delta eq">= planilla</span>`;
+  const up = d > 0; const good = betterUp ? up : !up;
+  return `<span class="delta ${good ? 'up' : 'down'}">${up ? '▲' : '▼'} ${fmt(Math.abs(d))}${unit} vs planilla</span>`;
+}
+function kpi(o) {
+  return `<div class="kpi ${o.cls || ''}" ${o.tip ? `data-tip="${esc(o.tip)}"` : ''}><span class="lbl">${o.lbl}</span><span class="val">${o.val}${o.unit ? `<small>${o.unit}</small>` : ''}</span>${o.extra || ''}${o.sub ? `<span class="sub">${o.sub}</span>` : ''}${o.delta || ''}</div>`;
+}
+function divColor(r) {
+  // r: saldo/demanda en [-1,1]
+  const t = Math.max(-1, Math.min(1, r)); const p = Math.round(Math.abs(t) * 100);
+  return `color-mix(in srgb, ${t < 0 ? 'var(--div-neg)' : 'var(--div-pos)'} ${p}%, var(--div-mid))`;
+}
+
+// ================= palancas (columna izquierda) =================
+const LEVERS = ['__pp', 'adg', 'cons', 'rgProd', 'avProd', 'siloProd', 'springGraze', 'priceBuy', 'priceSell'];
+function leverKey(k) { return k === '__pp' ? (ST.scenario === 'medio' ? 'ppMed' : 'ppObj') : k; }
+let lvOpen = null;
+function leversOpen() { if (lvOpen === null) lvOpen = window.innerWidth > 980; return lvOpen || window.innerWidth > 980; }
+document.addEventListener('toggle', e => { if (e.target.id === 'lv-det') lvOpen = e.target.open; }, true);
+function renderLevers(R) {
+  const rows = LEVERS.map(k0 => {
+    const k = leverKey(k0), d = DEF[k], v = ST.vals[k], ch = ST.touched.has(k);
+    const lab = k0 === '__pp' ? `Pastura · ${ST.scenario === 'medio' ? 'año medio' : 'objetivo'} (kg MS/ha/año)` : `${d.label}${d.unit && !d.unit.startsWith('%') ? ` (${d.unit})` : ''}`;
+    return `<div class="lever ${ch ? 'changed' : ''}"><div class="lever-h"><label for="lv-${k}">${esc(lab)}</label><output id="lvo-${k}">${FMT[d.fmt](v)}</output></div>
+      <input type="range" id="lv-${k}" data-k="${k}" min="${d.min}" max="${d.max}" step="${d.step}" value="${v}">
+      <small>Planilla: ${FMT[d.fmt](ST.base[k])}</small></div>`;
+  }).join('');
+  const nCh = ST.touched.size + ST.rotTouched.size + ST.rgTouched.obj.size + ST.rgTouched.medio.size;
+  $('#levers').innerHTML = `
+    <div class="panel"><h3>Resultado del escenario</h3><div class="mini" id="mini"></div></div>
+    <details class="panel" id="lv-det" ${leversOpen() ? 'open' : ''}><summary class="lv-sum">Palancas del escenario</summary><h3>Palancas principales</h3>${rows}
+      <div class="lev-foot"><button class="btn" id="go-sup" type="button">Todos los supuestos</button>${nCh ? `<button class="btn" id="reset-all" type="button">Volver a la planilla</button>` : ''}</div>
+      ${nCh ? `<p class="changes">${nCh} cambio${nCh > 1 ? 's' : ''} respecto de la planilla</p>` : ''}</details>`;
+  renderMini(R);
+}
+function renderMini(R) {
+  const avgDif = sumA(DESIGN_IDX.map(j => R.CV[j].dif)) / DESIGN_IDX.length;
+  $('#mini').innerHTML = `<div><b>${f0(Math.floor(R.design))}</b><span>cabezas / año</span></div><div><b>${f0(R.kgHa)}</b><span>kg carne / ha gan.</span></div>
+    <div><b>${f2(R.evAnual)}</b><span>EV / ha ganadera</span></div><div><b>${mill(avgDif)}</b><span>dif. hacienda / año</span></div>`;
+}
+
+// ================= pestañas =================
+function renderTabs() {
+  $('#tabs').innerHTML = TABS.map(([k, n]) => `<button class="tab" role="tab" aria-selected="${ST.tab === k}" data-tab="${k}">${n}</button>`).join('');
+}
+
+// ---------- RESUMEN ----------
+function insights(R) {
+  const out = [];
+  const bj = R.bindJ; const b = R.B[bj];
+  const limS = b.supports.indexOf(Math.min(...b.supports));
+  out.push(`La compra que se sostiene todos los años es de <b>${f0(Math.floor(R.design))} animales</b> el 1 de abril. La campaña que pone el techo es <b>${CAMP[bj]}</b>, y la estación más ajustada es el <b>${SEAS[limS].toLowerCase()}</b>.`);
+  out.push(`La superficie ganadera efectiva es de <b>${f1(R.supDesign)} ha</b> (${pct(R.supDesign / R.totalHa)} del campo). Sobre esa superficie se producen <b>${f0(R.kgHa)} kg de carne/ha</b>; sobre las ${f0(R.totalHa)} ha del campo, ${f0(R.kgHaCampo)} kg/ha.`);
+  if (R.kgHa > 500) out.push(`<b>${f0(R.kgHa)} kg/ha está por encima del rango de referencia</b> de una invernada pastoril intensiva del sudeste (300 a 500 kg/ha ganadera), según la planilla. Conviene mirar también el escenario de año medio.`);
+  else if (R.kgHa >= 300) out.push(`${f0(R.kgHa)} kg/ha queda dentro del rango de referencia de una invernada pastoril intensiva del sudeste (300 a 500 kg/ha ganadera), según la planilla.`);
+  const noClose = R.B.filter(x => !x.cierra).map(x => CAMP[x.j]);
+  out.push(noClose.length ? `Con la compra de diseño, <b>no cierran ${noClose.length === 1 ? 'la campaña' : 'las campañas'} ${noClose.join(', ')}</b>: el pasto y las reservas no alcanzan. En esas campañas se compra menos (ver Compra y venta).` : `Con la compra de diseño cierran las ${CAMP.length} campañas.`);
+  out.push(`El pico de carga es en <b>abril: ${f0(R.pico)} animales</b> por la superposición con la cabeza del año anterior. Con ${f0(ST.vals.waterL)} L/animal/día hacen falta <b>${f0(R.agua.litros)} L/día</b> y un caudal de ${f0(R.agua.caudal)} L/min.`);
+  const ind = sumA(DESIGN_IDX.map(j => R.CV[j].indif)) / DESIGN_IDX.length;
+  out.push(`El precio de venta de indiferencia promedio es <b>${money(ind)}/kg</b>, contra un precio de venta de ${money(ST.vals.priceSell)}/kg. Es el precio que iguala lo que se paga por la hacienda y no incluye otros costos.`);
+  return out;
+}
+function renderResumen(R, R0) {
+  const avgDif = sumA(DESIGN_IDX.map(j => R.CV[j].dif)) / DESIGN_IDX.length, avgDif0 = sumA(DESIGN_IDX.map(j => R0.CV[j].dif)) / DESIGN_IDX.length;
+  const ind = sumA(DESIGN_IDX.map(j => R.CV[j].indif)) / DESIGN_IDX.length;
+  const nClose = R.B.filter(b => b.cierra).length;
+  const bandPos = v => Math.max(0, Math.min(100, v / 700 * 100));
+  const k = [
+    kpi({ cls: 'hero', lbl: 'Compra de diseño · 1 de abril', val: f0(Math.floor(R.design)), unit: 'cabezas', sub: `${f0(Math.round(R.design * ST.vals.sCab))} cabeza · ${f0(Math.round(R.design * ST.vals.sCue))} cuerpo · ${f0(Math.round(R.design * ST.vals.sCol))} cola · ${f0(Math.floor(R.retD))} cuerpos retenidos en verano`, delta: delta(R.design, R0.design, f0, true, ' cab'), tip: 'La menor compra máxima entre 28/29 y 34/35: la que se sostiene todos los años.' }),
+    kpi({ lbl: 'Carne producida', val: f0(R.carne), unit: 'kg/año', sub: `${f1(R.kgAnimal)} kg por animal + ${f0(R.retGain)} kg por retenido`, delta: delta(R.carne, R0.carne, f0, true, ' kg') }),
+    kpi({ lbl: 'Producción por ha ganadera', val: f0(R.kgHa), unit: 'kg/ha', extra: `<div class="band" data-tip="Banda de referencia 300 a 500 kg/ha: invernada pastoril intensiva del sudeste (texto de la planilla)"><i style="left:${bandPos(300)}%;width:${bandPos(500) - bandPos(300)}%"></i><b style="left:calc(${bandPos(R.kgHa)}% - 1px)"></b></div>`, sub: `Referencia 300-500 · ${f0(R.kgHaCampo)} kg/ha sobre las ${f0(R.totalHa)} ha`, delta: delta(R.kgHa, R0.kgHa, f0, true, ' kg/ha') }),
+    kpi({ lbl: 'Carga media anual', val: f2(R.evAnual), unit: 'EV/ha gan.', sub: `${f2(R.evAnualCampo)} EV/ha sobre el campo entero`, delta: delta(R.evAnual, R0.evAnual, f2, true) }),
+    kpi({ lbl: 'Superficie ganadera efectiva', val: f1(R.supDesign), unit: 'ha', sub: `${pct(R.supDesign / R.totalHa)} del campo · promedio 28/29-34/35`, delta: delta(R.supDesign, R0.supDesign, f1, true, ' ha'), tip: 'Cada recurso pesado por su coeficiente de ocupación. El maíz silo va en cero.' }),
+    kpi({ lbl: 'Diferencia de hacienda', val: mill(avgDif), unit: '/año', sub: `Ventas − compras, promedio 28/29-34/35. Indiferencia ${money(ind)}/kg`, delta: delta(avgDif, avgDif0, mill, true) }),
+    kpi({ lbl: 'Campañas que cierran el balance', val: `${nClose}<small>/ ${CAMP.length}</small>`, sub: R.B.filter(b => !b.cierra).map(b => CAMP[b.j]).join(', ') ? `No cierran: ${R.B.filter(b => !b.cierra).map(b => CAMP[b.j]).join(', ')}` : 'Todas cierran con la compra de diseño' }),
+    kpi({ lbl: 'Pico de animales (abril)', val: f0(R.pico), unit: 'cab', sub: `Agua: ${f0(R.agua.litros)} L/día · ${f0(R.agua.caudal)} L/min`, delta: delta(R.pico, R0.pico, f0, false, ' cab') }),
+  ].join('');
+  const maxs = R.B.map(b => b.maxBuy);
+  const chart1 = bars({ cats: CAMP, series: [{ name: 'Compra máxima que banca el pasto', color: 'var(--r-past)', values: maxs }], h: 230, dim: [0, 1], hl: [R.bindJ], lines: [{ v: R.design, label: `Compra de diseño ${f0(Math.floor(R.design))}` }], valueLabels: true, fmt: f0, aria: 'Compra máxima por campaña' });
+  const heat = `<div class="tbl-wrap" style="border:0"><table class="heat"><thead><tr><th></th>${CAMP.map((c, j) => `<th class="${j === R.bindJ ? 'bind' : ''}">${c}</th>`).join('')}</tr></thead><tbody>
+    ${SEAS.map((s, k) => `<tr><td>${s}</td>${R.B.map(b => { const r = b.saldo[k] / b.demand[k]; return `<td class="cell" style="background:${divColor(r)};color:${Math.abs(r) > .55 ? '#fff' : 'var(--ink)'}" data-tip="${esc(`<b>${CAMP[b.j]} · ${s}</b><br>Oferta ${tn(b.offer[k])} · demanda ${tn(b.demand[k])}<br>Saldo ${tn(b.saldo[k])}`)}">${Math.abs(b.saldo[k]) < 500 ? '0' : (b.saldo[k] > 0 ? '+' : '−') + f0(Math.abs(b.saldo[k]) / 1000)}</td>`; }).join('')}</tr>`).join('')}
+    <tr><td>Reservas</td>${R.B.map(b => `<td><span class="pill ${b.cierra ? 'ok' : 'no'}" data-tip="${esc(`<b>${CAMP[b.j]}</b><br>Déficit ${tn(b.deficit)} · guardado ${tn(b.stored)}`)}">${b.cierra ? 'Cierra' : 'Falta'}</span></td>`).join('')}</tr></tbody></table></div>`;
+  return `<div class="sec-head"><div><h2>El planteo de <em>El Remanso</em> en números</h2><p>${f0(R.totalHa)} ha productivas, rotación de 9 campañas (26/27 a 34/35) y recría de novillitos comprados el 1 de abril. Escenario de pastura: <b>${ST.scenario === 'medio' ? 'año medio' : 'objetivo'}</b>, ${f0(R.prod)} kg MS/ha/año.</p></div></div>
+    <div class="kpis">${k}</div>
+    <div class="grid2">
+      <div class="card chart"><h4>Cuántos animales banca cada campaña</h4><p class="cap">Compra máxima el 1 de abril con pasto + reservas. 26/27 y 27/28 (atenuadas) quedan fuera del diseño: la pastura se está implantando.</p>${legend([['Compra máxima de la campaña', 'var(--r-past)'], [`Compra de diseño: ${f0(Math.floor(R.design))} cabezas`, 'var(--ink)', 'line']])}${chart1}</div>
+      <div class="card"><h4>Saldo de pasto por estación</h4><p class="cap">Oferta de pasto menos demanda con la compra de diseño, en toneladas de MS. Rojo: falta (lo tapan silaje y rollo). Azul: sobra.</p>${heat}</div>
+    </div>
+    <div class="card"><h4>Lectura del planteo</h4><p class="cap">Se recalcula con cada cambio.</p><ul class="list insights">${insights(R).map(t => `<li>${t}</li>`).join('')}</ul></div>`;
+}
+
+// ---------- ROTACIÓN ----------
+function cropSelect(li, j, c) {
+  const st = CROP_STYLE[c] || ['var(--surface-2)', 'var(--ink)', c];
+  const edited = ST.rotTouched.has(li + ':' + j);
+  return `<select class="crop ${edited ? 'edited' : ''}" data-li="${li}" data-j="${j}" style="background:${st[0]};color:${st[1]}" aria-label="Lote ${esc(ST.rot[li].id)}, ${CAMP[j]}">${CROPS.map(o => `<option value="${esc(o)}" ${o === c ? 'selected' : ''}>${esc(CROP_STYLE[o][2])}</option>`).join('')}</select>`;
+}
+function renderRotacion(R, R0) {
+  const S = R.S; const avg = f => sumA(DESIGN_IDX.map(j => f(S[j]))) / DESIGN_IDX.length;
+  const agri = s => s['Maíz grano'] + s['Girasol'] + s['Cebada/Soja 2da'] + s['Maíz silo'];
+  const k = [
+    kpi({ lbl: 'Pastura perenne promedio', val: f1(avg(s => s.past)), unit: 'ha', sub: `${pct(avg(s => s.pctPast))} de la superficie rotable · 28/29-34/35`, delta: delta(avg(s => s.past), sumA(DESIGN_IDX.map(j => R0.S[j].past)) / 7, f1, true, ' ha') }),
+    kpi({ lbl: 'Agricultura promedio', val: f1(avg(agri)), unit: 'ha', sub: `Maíz grano ${f1(avg(s => s['Maíz grano']))} · girasol ${f1(avg(s => s['Girasol']))} · silo ${f1(avg(s => s['Maíz silo']))}` }),
+    kpi({ lbl: 'Avena sobre maíz silo', val: f1(avg(s => s.avena)), unit: 'ha/año', sub: 'No se siembra si después viene pastura o cebada' }),
+    kpi({ lbl: 'Nichos de raigrás al voleo', val: f1(avg(s => s.nichos)), unit: 'ha/año', sub: 'Maíz grano seguido de un cultivo de verano' }),
+  ].join('');
+  const rows = ST.rot.map((l, li) => `<tr><td><b>Lote ${esc(l.id)}</b><span class="meta">${esc(l.amb)} · ${f2(l.ha)} ha</span></td>${l.crops.map((c, j) => {
+    const av = c === 'Maíz silo' && (j === CAMP.length - 1 || (!String(l.crops[j + 1]).startsWith('PP') && !String(l.crops[j + 1]).startsWith('Cebada')));
+    const rg = j < CAMP.length - 1 && c === 'Maíz grano' && ['Maíz grano', 'Maíz silo', 'Girasol'].includes(l.crops[j + 1]);
+    return `<td>${cropSelect(li, j, c)}<div class="tags">${av ? '<span class="tag av" data-tip="Lleva avena sobre el rastrojo del maíz silo">+Avena</span>' : ''}${rg ? '<span class="tag rg" data-tip="Nicho posible para volear raigrás dentro del maíz">Raigrás</span>' : ''}</div></td>`;
+  }).join('')}</tr>`).join('');
+  const series = [['PP 1', 'PP 1'], ['PP 2', 'PP 2'], ['PP 3', 'PP 3'], ['PP 4', 'PP 4'], ['pastizal', 'Pastizal'], ['Maíz silo', 'Maíz silo'], ['Maíz grano', 'Maíz grano'], ['Girasol', 'Girasol'], ['Cebada/Soja 2da', 'Cebada/Soja 2ª']];
+  const ch = bars({ cats: CAMP, stacked: true, h: 260, series: series.map(([key, n]) => ({ name: n, color: CROP_STYLE[key][0], values: S.map(s => s[key]) })), fmt: v => f1(v) + ' ha', axisFmt: f0, aria: 'Superficie por uso y campaña' });
+  const ctr = R.controles.filter(c => c.tipo !== 'antecesor' || c.ok !== true);
+  const ctrHtml = ctr.length ? ctr.map(c => {
+    if (c.tipo === 'maiz') return `<li><span class="pill wa">Revisar</span><span>Lote ${esc(c.lote.id)}, ${CAMP[c.j - 1]} → ${CAMP[c.j]}: ${esc(c.prev)} → ${esc(c.c)}. Maíz sobre maíz: sube la presión de enfermedades de rastrojo y el consumo de N.</span></li>`;
+    if (c.tipo === 'antecesor') return c.ok === null ? `<li><span class="pill mu">Sin dato</span><span>Lote ${esc(c.lote.id)}: PP 1 en ${CAMP[c.j]}, el antecesor es previo al plan.</span></li>` : `<li><span class="pill no">Revisar</span><span>Lote ${esc(c.lote.id)}: PP 1 en ${CAMP[c.j]} sobre ${esc(c.prev)}.</span></li>`;
+    return `<li><span class="pill no">Revisar</span><span>Lote ${esc(c.lote.id)}, ${CAMP[c.j]}: ${esc(c.prev)} → ${esc(c.c)}. La pastura tiene que avanzar PP 1 → PP 2 → PP 3 → PP 4.</span></li>`;
+  }).join('') : '<li><span class="pill ok">OK</span><span>Sin secuencias para revisar.</span></li>';
+  const nPP1 = R.controles.filter(c => c.tipo === 'antecesor' && c.ok === true).length;
+  return `<div class="sec-head"><div><h2>Rotación por lote y campaña</h2><p>Hacé clic en una celda para cambiar el cultivo. La avena y los nichos de raigrás se recalculan solos, igual que en la planilla.</p></div>${ST.rotTouched.size ? '<button class="btn" id="rot-reset" type="button">Volver a la rotación de la planilla</button>' : ''}</div>
+    <div class="kpis">${k}</div>
+    <div class="tbl-wrap"><table class="rot"><thead><tr><th>Lote</th>${CAMP.map(c => `<th>${c}</th>`).join('')}</tr></thead><tbody>${rows}
+      <tr class="tot"><td>Pastura total</td>${S.map(s => `<td>${f1(s.past)} ha</td>`).join('')}</tr></tbody></table></div>
+    <div class="grid2">
+      <div class="card chart"><h4>Superficie por uso</h4><p class="cap">Hectáreas brutas por campaña (${f0(R.totalHa)} ha).</p>${legend(series.map(([key, n]) => [n, CROP_STYLE[key][0]]))}${ch}</div>
+      <div class="card"><h4>Controles de la rotación</h4><p class="cap">${nPP1} implantaciones de pastura con antecesor correcto. Se recalcula al editar.</p><ul class="list">${ctrHtml}</ul></div>
+    </div>`;
+}
+
+// ---------- BALANCE ----------
+function renderBalance(R, R0) {
+  if (ST.camp == null) ST.camp = R.bindJ;
+  const j = ST.camp, b = R.B[j];
+  const limS = b.supports.indexOf(Math.min(...b.supports));
+  const sel = `<div class="campsel">${CAMP.map((c, i) => `<button type="button" data-camp="${i}" aria-pressed="${i === j}" class="${i === R.bindJ ? 'lim' : ''}">${c}</button>`).join('')}</div>`;
+  const k = [
+    kpi({ cls: j === R.bindJ ? 'hero' : '', lbl: `Compra máxima ${CAMP[j]}`, val: f0(b.maxBuy), unit: 'cab', sub: j === R.bindJ ? 'Es la campaña que pone el techo del diseño' : (j < 2 ? 'Fuera del diseño: pastura en implantación' : `Diseño: ${f0(Math.floor(R.design))} cab`) }),
+    kpi({ lbl: 'Estación más ajustada', val: SEAS[limS], sub: `Banca ${f0(b.supports[limS])} animales sólo con su pasto` }),
+    kpi({ lbl: 'Forraje guardado', val: tn(b.stored), sub: `Silaje ${tn(b.silaje)} · rollo ${tn(b.rollo)}` }),
+    kpi({ lbl: 'Déficit a tapar', val: tn(b.deficit), sub: `${b.cierra ? 'Sobran' : 'Faltan'} ${tn(Math.abs(b.sobra))} con la compra de diseño`, extra: `<span class="pill ${b.cierra ? 'ok' : 'no'}" style="align-self:flex-start">${b.cierra ? 'Cierra' : 'No cierra'}</span>` }),
+    kpi({ lbl: 'Cuerpo retenido en verano', val: f0(Math.floor(b.ret)), unit: 'cab', sub: `Se comen el excedente de verano y salen a ${f0(R.F.ret)} kg` }),
+  ].join('');
+  const parts = [['Pastura', 'pastura', 'var(--r-past)'], ['Pastizal', 'pastizal', 'var(--r-pz)'], ['Avena', 'avena', 'var(--r-av)'], ['Raigrás', 'raigras', 'var(--r-rg)']];
+  const ch1 = bars({ cats: SEAS, stacked: true, h: 250, series: parts.map(([n, key, c]) => ({ name: n, color: c, values: b.offerParts.map(p => p[key]) })), markers: { values: b.demand, label: 'Demanda con la compra de diseño' }, fmt: tn, axisFmt: v => f0(v / 1000), aria: 'Oferta y demanda por estación' });
+  const ch2 = bars({ cats: CAMP, h: 230, series: [{ name: 'Déficit de pasto', color: 'var(--div-neg)', values: R.B.map(x => x.deficit) }, { name: 'Silaje + rollo disponible', color: 'var(--r-silo)', values: R.B.map(x => x.stored) }], fmt: tn, axisFmt: v => f0(v / 1000), hl: [j], aria: 'Déficit y reservas por campaña' });
+  const sc = ST.scenario;
+  const rgRows = CAMP.map((c, i) => {
+    const max = R.S[i].nichos; const v = ST.rg[sc][i]; const ok = v <= max + 0.01;
+    return `<div class="rgrow"><b>${c}</b><input type="range" data-rg="${i}" min="0" max="${Math.max(max, v).toFixed(2)}" step="0.1" value="${v}" ${max <= 0 && v <= 0 ? 'disabled' : ''} aria-label="Raigrás ${c}"><div><input type="number" data-rgn="${i}" min="0" step="0.1" value="${v}" aria-label="ha de raigrás ${c}"><div class="cap2">${ok ? `de ${f1(max)} ha` : `<span style="color:var(--bad)">máx. ${f1(max)} ha</span>`}</div></div></div>`;
+  }).join('');
+  const row = (lab, f, cls = '') => `<tr class="${cls}"><td>${lab}</td>${R.B.map(x => `<td class="${x.j === R.bindJ ? 'bind' : ''}">${f(x)}</td>`).join('')}</tr>`;
+  const table = `<div class="tbl-wrap"><table><thead><tr><th>Concepto</th>${CAMP.map((c, i) => `<th class="${i === R.bindJ ? 'bind' : ''}">${c}</th>`).join('')}</tr></thead><tbody>
+    <tr class="grp"><td colspan="10">Superficies (ha)</td></tr>
+    ${row('Pastura total', x => f1(R.S[x.j].past))}${row('  de la cual PP 1', x => f1(R.S[x.j].pp1))}${row('Avena', x => f1(R.S[x.j].avena))}${row('Maíz silo', x => f1(R.S[x.j].silo))}${row('Raigrás voleado', x => f1(x.rg))}${row('Superficie ganadera efectiva', x => f1(x.supG), 'tot')}
+    <tr class="grp"><td colspan="10">Oferta de pasto utilizable (t MS)</td></tr>
+    ${SEAS.map((s, kk) => row(s, x => f1(x.offer[kk] / 1000))).join('')}${row('Silaje + rollo', x => f1(x.stored / 1000))}
+    <tr class="grp"><td colspan="10">Animales</td></tr>
+    ${row('Compra máxima', x => f0(x.maxBuy), 'tot')}${row('Cuerpo retenido', x => f0(x.ret))}
+    <tr class="grp"><td colspan="10">Balance con la compra de diseño (t MS)</td></tr>
+    ${SEAS.map((s, kk) => row('Saldo ' + s.toLowerCase(), x => `<span style="color:${x.saldo[kk] < -0.5 ? 'var(--bad)' : 'inherit'}">${f1(x.saldo[kk] / 1000)}</span>`)).join('')}
+    ${row('Déficit a tapar', x => f1(x.deficit / 1000))}${row('Sobra o falta', x => f1(x.sobra / 1000), 'tot')}${row('¿Cierra?', x => `<span class="pill ${x.cierra ? 'ok' : 'no'}">${x.cierra ? 'Sí' : 'No'}</span>`)}${row('Pasto que sobra y no se come', x => f1(x.sobrante / 1000))}
+  </tbody></table></div>`;
+  return `<div class="sec-head"><div><h2>Balance forrajero</h2><p>Oferta de pasto por estación contra la demanda de la recría. El silaje y el rollo tapan el bache donde haga falta; el excedente de verano se lo come el cuerpo retenido.</p></div>${sel}</div>
+    <div class="kpis k5">${k}</div>
+    <div class="grid2">
+      <div class="card chart"><h4>Oferta y demanda por estación · ${CAMP[j]}</h4><p class="cap">Toneladas de MS utilizable. La raya negra es la demanda con la compra de diseño.</p>${legend([...parts.map(p => [p[0], p[2]]), ['Demanda', 'var(--ink)', 'line']])}${ch1}</div>
+      <div class="card chart"><h4>Déficit de pasto contra reservas</h4><p class="cap">Si las reservas superan al déficit, la campaña cierra.</p>${legend([['Déficit de pasto', 'var(--div-neg)'], ['Silaje + rollo', 'var(--r-silo)']])}${ch2}</div>
+    </div>
+    <div class="grid2">
+      <div class="card"><h4>Raigrás al voleo · escenario ${sc === 'medio' ? 'año medio' : 'objetivo'}</h4><p class="cap">La palanca de la planilla. Hectáreas que se volean dentro del maíz para grano. No puede superar los nichos de esa campaña. El raigrás aporta sobre todo en primavera; el bache está en otoño e invierno.</p>${rgRows}</div>
+      <div class="card"><h4>Cómo se calcula</h4><ul class="list note" style="gap:6px">
+        <li>Oferta = ha × producción × % de la estación × eficiencia de cosecha. La PP 1 rinde el ${pct(ST.vals.pp1Factor)} y sólo produce en primavera y verano.</li>
+        <li>En primavera se pastorea el ${pct(ST.vals.springGraze)} de la pastura; el resto se hace rollo.</li>
+        <li>Compra máxima: se ordenan las estaciones de más a menos ajustada y se busca cuántos animales se pueden comprar tapando los baches con silaje y rollo.</li>
+        <li>Compra de diseño: la menor compra máxima entre 28/29 y 34/35.</li>
+        <li>Superficie ganadera: pastura y pastizal al 100%, avena al ${pct(ST.vals.occAv)}, raigrás al ${pct(ST.vals.occRg)} y maíz silo al ${pct(ST.vals.occSilo)} del año.</li></ul></div>
+    </div>
+    ${table}`;
+}
+
+// ---------- RECRÍA ----------
+function gantt(R) {
+  const W = 960, H = 210, L = 150, Rr = 10, T = 26;
+  const months = ['abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic', 'ene', 'feb', 'mar', 'abr'];
+  const days = 365 + 30; const x = d => L + d / days * (W - L - Rr);
+  const rows = [['Cabeza', 0, R.D.cab, ST.vals.wCab, R.F.cab, 'var(--h-cab)'], ['Cuerpo (venta 1-dic)', 0, R.D.cue, ST.vals.wCue, R.F.cue, 'var(--h-cue)'], ['Cuerpo retenido', 0, R.D.ret, ST.vals.wCue, R.F.ret, 'var(--h-vieja)'], ['Cola', 0, R.D.col, ST.vals.wCol, R.F.col, 'var(--h-col)']];
+  let s = `<svg viewBox="0 0 ${W} ${H}" class="gantt" role="img" aria-label="Calendario de la recría">`;
+  const seasonsBands = [[0, 61, 2], [61, 153, 3], [153, 244, 0], [244, 334, 1], [334, 395, 2]];
+  seasonsBands.forEach(([a, b2, k]) => { s += `<rect x="${x(a)}" y="${T - 4}" width="${x(b2) - x(a)}" height="${H - T - 6}" fill="${SCOL[k]}" opacity=".07"/>`; });
+  const mdays = [0, 30, 61, 91, 122, 153, 183, 214, 244, 275, 306, 334, 365];
+  mdays.forEach((d, i) => { s += `<line class="grid" x1="${x(d)}" x2="${x(d)}" y1="${T - 4}" y2="${H - 10}"/><text x="${x(d) + 3}" y="${T - 10}">${months[i]}</text>`; });
+  rows.forEach(([n, a, d, w0, w1, c], i) => {
+    const yy = T + 10 + i * 40;
+    s += `<text class="lab" x="0" y="${yy + 13}">${n}</text><rect class="m" x="${x(a)}" y="${yy}" width="${x(d) - x(a)}" height="18" rx="4" fill="${c}" data-tip="${esc(`<b>${n}</b><br>${f0(d)} días en el campo<br>Entra ${f0(w0)} kg · sale ${f0(w1)} kg`)}"/>`;
+    s += `<text x="${x(a) + 8}" y="${yy + 13}" style="fill:#fff;font-weight:600">${f0(w0)} kg</text><text x="${x(d) - 8}" y="${yy + 13}" text-anchor="end" style="fill:#fff;font-weight:600">${f0(w1)} kg · ${f0(d)} días</text>`;
+  });
+  return s + '</svg>';
+}
+function renderRecria(R, R0) {
+  const k = [
+    kpi({ lbl: 'Kg ganados por animal comprado', val: f1(R.kgAnimal), unit: 'kg', sub: `Promedio de las tres categorías a ${f2(ST.vals.adg)} kg/día`, delta: delta(R.kgAnimal, R0.kgAnimal, f1, true, ' kg') }),
+    kpi({ lbl: 'Consumo por animal comprado', val: f0(R.consTot), unit: 'kg MS/año', sub: `${f1(ST.vals.cons * 100)}% del peso vivo por día` }),
+    kpi({ lbl: 'Conversión', val: f1(R.conversion), unit: 'kg MS/kg carne', sub: 'Entre 12 y 18 es lo normal en recría pastoril', extra: `<span class="pill ${R.conversion >= 12 && R.conversion <= 18 ? 'ok' : 'wa'}" style="align-self:flex-start">${R.conversion >= 12 && R.conversion <= 18 ? 'En rango' : 'Fuera de rango'}</span>` }),
+    kpi({ lbl: 'Cuerpo retenido', val: '+' + f0(R.retGain), unit: 'kg/animal', sub: `Come ${f0(R.retCons)} kg MS en ${f0(ST.vals.retDays)} días de verano` }),
+    kpi({ lbl: 'Pico de animales', val: f0(R.pico), unit: 'cab', sub: 'Abril: dos grupos juntos' }),
+  ].join('');
+  const hs = [['Cabeza nueva', 'cabNueva', 'var(--h-cab)'], ['Cuerpo', 'cuerpo', 'var(--h-cue)'], ['Cola', 'cola', 'var(--h-col)'], ['Cabeza del año anterior', 'cabVieja', 'var(--h-vieja)']];
+  const ch = bars({ cats: R.herd.map(h => h.mes.slice(0, 3)), stacked: true, h: 240, series: hs.map(([n, key, c]) => ({ name: n, color: c, values: R.herd.map(h => h[key]) })), fmt: v => f0(v) + ' cab', axisFmt: f0, valueLabels: true, labelFmt: f0, aria: 'Rodeo mes a mes' });
+  const consT = `<div class="tbl-wrap"><table><thead><tr><th>Estación</th><th>Días</th><th>kg MS por animal comprado</th><th>Equivale a EV</th></tr></thead><tbody>${SEAS.map((s, kk) => `<tr><td>${s}</td><td>${SDAYS[kk]}</td><td>${f0(R.cons[kk])}</td><td>${f2(R.cons[kk] / (ST.vals.evKg * SDAYS[kk]))}</td></tr>`).join('')}<tr class="tot"><td>Total año</td><td>365</td><td>${f0(R.consTot)}</td><td></td></tr></tbody></table></div>`;
+  const tram = `<div class="tbl-wrap"><table><thead><tr><th>Categoría · tramo</th><th>Estación</th><th>Días</th><th>Peso medio (kg)</th><th>kg MS del tramo</th><th>Reparto</th></tr></thead><tbody>${R.tramos.map(t => `<tr><td>${t.cat} · ${t.tramo}</td><td>${SEAS[t.season]}</td><td>${t.days}</td><td>${f0(t.peso)}</td><td>${f0(t.kg)}</td><td>${pct(t.share)}</td></tr>`).join('')}</tbody></table></div>`;
+  return `<div class="sec-head"><div><h2>Planteo de recría</h2><p>Compra el 1 de abril, clasificada en cabeza, cuerpo y cola. El 1 de diciembre se venden la cola y parte del cuerpo; el resto del cuerpo pasa el verano. La cabeza sigue hasta el 30 de abril y se superpone ${f0(ST.vals.overlap)} días con la compra siguiente.</p></div></div>
+    <div class="kpis k5">${k}</div>
+    <div class="card chart"><h4>Calendario y pesos</h4><p class="cap">Días en el campo y pesos de entrada y salida, con ${f2(ST.vals.adg)} kg/día promedio. El fondo marca las estaciones.</p>${gantt(R)}</div>
+    <div class="grid2">
+      <div class="card chart"><h4>Rodeo mes a mes</h4><p class="cap">Con la compra de diseño. El pico de abril dimensiona el agua.</p>${legend(hs.map(h => [h[0], h[2]]))}${ch}</div>
+      <div class="card"><h4>Consumo por animal comprado</h4><p class="cap">Promedio de las tres categorías, sin el cuerpo retenido.</p>${consT}<p class="note" style="margin-top:10px">El aumento diario es un promedio anual. El modelo usa una recta: en el campo se gana menos en invierno y más en primavera. El peso final y los kg totales no cambian.</p></div>
+    </div>
+    <details class="card"><summary>Tramos de consumo por categoría</summary><div style="margin-top:12px">${tram}</div></details>`;
+}
+
+// ---------- COMPRA Y VENTA ----------
+function renderCyV(R, R0) {
+  const CV = R.CV; const T = key => sumA(CV.map(c => c[key]));
+  const indAvg = T('buy') / T('kgSold');
+  const marg = ST.vals.priceSell / indAvg - 1;
+  const k = [
+    kpi({ lbl: 'Cabezas compradas · 9 campañas', val: f0(T('heads')), unit: 'cab', sub: `${f0(T('kgBuy'))} kg comprados` }),
+    kpi({ lbl: 'Kg producidos · 9 campañas', val: f0(T('kgProd')), unit: 'kg', sub: 'Vendidos menos comprados', delta: delta(T('kgProd'), sumA(R0.CV.map(c => c.kgProd)), f0, true, ' kg') }),
+    kpi({ cls: 'hero', lbl: 'Diferencia de hacienda · 9 campañas', val: mill(T('dif')), sub: `Ventas ${mill(T('sales'))} − compras ${mill(T('buy'))}`, delta: delta(T('dif'), sumA(R0.CV.map(c => c.dif)), mill, true) }),
+    kpi({ lbl: 'Precio de venta de indiferencia', val: money(indAvg), unit: '/kg', sub: `Venta a ${money(ST.vals.priceSell)}/kg: ${marg >= 0 ? 'margen' : 'quebranto'} de ${pct(Math.abs(marg))} sobre la compra`, extra: `<span class="pill ${marg > 0.25 ? 'ok' : marg > 0 ? 'wa' : 'no'}" style="align-self:flex-start">Relación venta/compra ${f2(ST.vals.priceSell / ST.vals.priceBuy)}</span>` }),
+  ].join('');
+  const ch = bars({ cats: CAMP, h: 250, series: [{ name: 'Compras', color: 'var(--s-inv)', values: CV.map(c => c.buy) }, { name: 'Ventas', color: 'var(--r-past)', values: CV.map(c => c.sales) }], fmt: mill, axisFmt: v => f0(v / 1e6), aria: 'Compras y ventas por campaña' });
+  const ch2 = bars({ cats: CAMP, h: 250, series: [{ name: 'Diferencia de hacienda', color: 'var(--accent)', values: CV.map(c => c.dif) }], fmt: mill, axisFmt: v => f0(v / 1e6), valueLabels: true, labelFmt: v => f0(v / 1e6), aria: 'Diferencia por campaña' });
+  const row = (lab, f, cls = '') => `<tr class="${cls}"><td>${lab}</td>${CV.map(c => `<td>${f(c)}</td>`).join('')}<td>${typeof f === 'function' && f.total ? f.total() : ''}</td></tr>`;
+  const tot = (key, fm = f0) => { const fn = c => fm(c[key]); fn.total = () => fm(T(key)); return fn; };
+  const table = `<div class="tbl-wrap"><table><thead><tr><th>Concepto</th>${CAMP.map(c => `<th>${c}</th>`).join('')}<th>Total</th></tr></thead><tbody>
+    <tr class="grp"><td colspan="11">Compra · 1 de abril</td></tr>
+    ${row('Cabezas compradas', tot('heads'), 'tot')}${row('  Cabeza', tot('nCab'))}${row('  Cuerpo', tot('nCue'))}${row('  Cola', tot('nCol'))}${row('kg comprados', tot('kgBuy'))}${row('Importe de compra', tot('buy', mill))}
+    <tr class="grp"><td colspan="11">Venta 1 · 1 de diciembre: cola y cuerpo</td></tr>
+    ${row('Cuerpo retenido (pasa el verano)', tot('ret'))}${row('Cabezas vendidas', tot('v1h'))}${row('kg vendidos', tot('v1kg'))}${row('Importe', tot('v1$', mill))}
+    <tr class="grp"><td colspan="11">Venta 2 · 1 de marzo: cuerpo retenido</td></tr>
+    ${row('Cabezas vendidas', tot('v2h'))}${row('kg vendidos', tot('v2kg'))}${row('Importe', tot('v2$', mill))}
+    <tr class="grp"><td colspan="11">Venta 3 · 30 de abril: cabeza</td></tr>
+    ${row('Cabezas vendidas', tot('v3h'))}${row('kg vendidos', tot('v3kg'))}${row('Importe', tot('v3$', mill))}
+    <tr class="grp"><td colspan="11">Resumen del lote</td></tr>
+    ${row('kg producidos', tot('kgProd'))}${row('Importe de ventas', tot('sales', mill))}${row('Diferencia de hacienda', tot('dif', mill), 'tot')}
+    ${row('Diferencia por cabeza comprada', c => money(c.difHead))}${row('Precio de indiferencia ($/kg)', c => money(c.indif))}
+  </tbody></table></div>`;
+  return `<div class="sec-head"><div><h2>Compra y venta de hacienda</h2><p>Cada columna sigue al lote comprado el 1 de abril de esa campaña hasta que se vende el último animal. Se compra la menor entre la compra de diseño y lo que banca el pasto de esa campaña. Escenario <b>${ST.scenario === 'medio' ? 'año medio' : 'objetivo'}</b>.</p></div></div>
+    <div class="kpis">${k}</div>
+    <div class="grid2">
+      <div class="card chart"><h4>Compras y ventas por campaña</h4><p class="cap">Millones de pesos a precios de la planilla.</p>${legend([['Compras', 'var(--s-inv)'], ['Ventas', 'var(--r-past)']])}${ch}</div>
+      <div class="card chart"><h4>Diferencia de hacienda por campaña</h4><p class="cap">Ventas menos compras, en millones de pesos.</p>${ch2}</div>
+    </div>
+    ${table}
+    <p class="note">La diferencia de hacienda no es un margen: la planilla no tiene costos de implantación, silaje, sanidad, estructura ni el resultado de la agricultura.</p>`;
+}
+
+// ---------- PASTOREO ----------
+function renderPastoreo(R, R0) {
+  const P = R.PR; const par = ST.parcelas; const totHa = sumA(par.map(p => p[1])), totN = sumA(par.map(p => p[2])), totM = sumA(par.map(p => p[6]));
+  const k = [
+    kpi({ lbl: 'Parcelas del diseño físico', val: f0(totN), unit: 'parcelas', sub: `${f2(totHa / totN)} ha promedio · ${f1(totHa)} ha` }),
+    kpi({ lbl: 'Alambre eléctrico interno', val: f0(totM), unit: 'm', sub: 'Shapefile Potreros_Diseno' }),
+    kpi({ lbl: 'Agua en el pico', val: f0(R.agua.litros), unit: 'L/día', sub: `${f0(R.pico)} cabezas × ${f0(ST.vals.waterL)} L`, delta: delta(R.agua.litros, R0.agua.litros, f0, false, ' L') }),
+    kpi({ lbl: 'Caudal a dimensionar', val: f0(R.agua.caudal), unit: 'L/min', sub: `Frente de bebedero ${f1(R.agua.frente)} m · 20% del rodeo bebe a la vez` }),
+    kpi({ lbl: 'Distancia al agua', val: '229', unit: 'm mediana', sub: `${SHEET.aguaTexto.distancia} · forma: ${SHEET.aguaTexto.forma}` }),
+  ].join('');
+  const ch1 = bars({ cats: SEAS, h: 220, series: [{ name: 'EV/ha ganadera', color: 'var(--r-past)', values: P.map(p => p.evHa) }], fmt: f2, axisFmt: v => f1(v), valueLabels: true, labelFmt: f2, aria: 'Carga por estación' });
+  const ch2 = bars({ cats: SEAS, h: 220, series: [{ name: '% de la dieta que cubre la pastura sola', color: 'var(--s-inv)', values: P.map(p => p.dieta) }], fmt: v => pct(v), axisFmt: v => pct(v), valueLabels: true, labelFmt: v => pct(v), aria: 'Cobertura de la dieta con pastura' });
+  const r = (lab, f) => `<tr><td>${lab}</td>${P.map(f).map(x => `<td>${x}</td>`).join('')}</tr>`;
+  const tab = `<div class="tbl-wrap"><table><thead><tr><th>Concepto</th>${SEAS.map(s => `<th>${s}</th>`).join('')}</tr></thead><tbody>
+    <tr class="grp"><td colspan="5">Carga real por estación</td></tr>
+    ${r('Cabezas en el campo (promedio)', p => f0(p.heads))}${r('Demanda de la estación (t MS)', p => f1(p.dem / 1000))}${r('Carga equivalente (EV)', p => f0(p.ev))}${r('EV/ha ganadera', p => f2(p.evHa))}${r(`EV/ha sobre las ${f0(R.totalHa)} ha`, p => f2(p.evHaCampo))}
+    <tr class="grp"><td colspan="5">Circuito de pastura</td></tr>
+    ${r('Días de descanso', (p, i) => f0(ST.vals['desc' + i]))}${r('Tasa de crecimiento (kg MS/ha/día)', p => f1(p.growth))}${r('Rebrote en el descanso (kg MS/ha)', p => f0(p.rebrote))}${r('Forraje cosechable por pastoreo (kg MS/ha)', p => f0(p.cosech))}${r('Parcelas del circuito', p => f0(p.parcelas))}${r(`Demanda por movimiento de ${f0(ST.vals.ocup)} días (kg MS)`, p => f0(p.move))}${r('Superficie de parcela necesaria (ha)', p => f2(p.parcelHa))}${r('Superficie del circuito necesaria (ha)', p => f1(p.circuito))}${r('Pastura en la campaña más floja (ha)', p => f1(p.pastMin))}${r('% de la dieta que cubre la pastura sola', p => pct(p.dieta, 1))}
+  </tbody></table></div>`;
+  const ptab = `<div class="tbl-wrap"><table><thead><tr><th>Lote (ID diseño)</th><th>ha</th><th>Parcelas</th><th>Disposición</th><th>ha por parcela</th><th>Relación lado/lado</th><th>Alambre interno (m)</th></tr></thead><tbody>${par.map(p => `<tr><td>${esc(p[0])}</td><td>${f2(p[1])}</td><td>${p[2]}</td><td>${esc(p[3])}</td><td>${esc(p[4])}</td><td>${f2(p[5])}</td><td>${f0(p[6])}</td></tr>`).join('')}<tr class="tot"><td>Total</td><td>${f2(totHa)}</td><td>${totN}</td><td></td><td>${f2(totHa / totN)}</td><td></td><td>${f0(totM)}</td></tr></tbody></table></div>`;
+  return `<div class="sec-head"><div><h2>Pastoreo rotativo y agua</h2><p>Ocupación de ${f0(ST.vals.ocup)} días por parcela, eficiencia de cosecha del ${pct(ST.vals.rotEff)}. Número de parcelas = días de descanso ÷ ${f0(ST.vals.ocup)} + 1. Carga calculada con la compra de diseño.</p></div></div>
+    <div class="kpis k5">${k}</div>
+    <div class="grid2">
+      <div class="card chart"><h4>Carga por estación</h4><p class="cap">EV por hectárea ganadera efectiva (${f1(R.supDesign)} ha). 1 EV = ${f0(ST.vals.evKg)} kg MS/día.</p>${ch1}</div>
+      <div class="card chart"><h4>Cuánto de la dieta cubre la pastura sola</h4><p class="cap">En la campaña con menos pastura. El resto sale de la avena, el raigrás, el silaje y el rollo.</p>${ch2}</div>
+    </div>
+    ${tab}
+    <div class="card"><h4>Diseño físico real · ${totN} parcelas</h4><p class="cap">Sobre el shapefile Potreros_Diseno (EPSG:32721). Cortes alineados: 31 vértices donde concurren 4 parcelas para el bebedero móvil.</p>${ptab}</div>`;
+}
+
+// ---------- SUPUESTOS ----------
+function renderSupuestos() {
+  const groups = [...new Set(PARAM_DEFS.map(d => d[1]))];
+  const sumS = ST.vals.sCab + ST.vals.sCue + ST.vals.sCol;
+  const sumPP = ST.vals.ppS0 + ST.vals.ppS1 + ST.vals.ppS2 + ST.vals.ppS3;
+  const warn = [];
+  if (Math.abs(sumS - 1) > 0.001) warn.push(`El reparto cabeza + cuerpo + cola suma ${pct(sumS)}; tiene que dar 100%.`);
+  if (Math.abs(sumPP - 1) > 0.001) warn.push(`Los % estacionales de la pastura suman ${pct(sumPP)}; tienen que dar 100%.`);
+  const html = groups.map(g => `<div class="card pgroup"><h4 style="margin-bottom:6px">${g}</h4>${PARAM_DEFS.filter(d => d[1] === g).map(d => {
+    const k = d[0], df = DEF[k], v = ST.vals[k], ch = ST.touched.has(k);
+    const isP = df.fmt[0] === 'p';
+    const shown = isP ? +(v * 100).toFixed(2) : v;
+    return `<div class="prow ${ch ? 'changed' : ''}"><div class="pl"><span>${esc(df.label)}</span><small>${esc(df.src)}</small></div>
+      <div class="pin"><input type="number" data-pk="${k}" value="${shown}" step="${isP ? +(df.step * 100).toFixed(4) : df.step}" aria-label="${esc(df.label)}"><span class="note">${esc(isP ? '%' : df.unit)}</span></div>
+      <div class="pb">Planilla: ${FMT[df.fmt](ST.base[k])}${ch ? `<br><button class="reset" type="button" data-rk="${k}">Restablecer</button>` : ''}</div></div>`;
+  }).join('')}</div>`).join('');
+  return `<div class="sec-head"><div><h2>Supuestos del modelo</h2><p>Son las celdas amarillas de la hoja Supuestos y los parámetros de Pastoreo rotativo, con su fuente. Al cambiar uno se recalcula todo el tablero.</p></div>${ST.touched.size ? '<button class="btn" id="sup-reset" type="button">Restablecer todos</button>' : ''}</div>
+    ${warn.length ? `<div class="card" style="border-color:var(--warn)"><ul class="list">${warn.map(w => `<li><span class="pill wa">Atención</span><span>${w}</span></li>`).join('')}</ul></div>` : ''}
+    <div class="grid2">${html}</div>`;
+}
+
+// ================= render general =================
+let rafId = 0;
+function render() {
+  cancelAnimationFrame(rafId);
+  rafId = requestAnimationFrame(() => {
+    const R = run(false), R0 = run(true);
+    const fn = { resumen: renderResumen, rotacion: renderRotacion, balance: renderBalance, recria: renderRecria, cyv: renderCyV, pastoreo: renderPastoreo, supuestos: renderSupuestos }[ST.tab];
+    $('#main').innerHTML = fn(R, R0);
+    renderMini(R);
+  });
+}
+function renderAll() { renderTabs(); renderLevers(run(false)); renderStatus(); render(); }
+function renderStatus() {
+  const el = $('#status'); const l = ST.live;
+  el.className = 'status ' + (l.status === 'live' ? 'live' : l.status === 'loading' ? 'loading' : '');
+  $('#status-t').textContent = l.status === 'live' ? `En vivo · planilla leída ${l.at}` : l.status === 'loading' ? 'Leyendo la planilla…' : `Datos de la planilla al ${l.at}`;
+  el.dataset.tip = l.status === 'live' ? 'Los datos se leen de la Google Sheet. Se vuelven a leer cada 2 minutos.' : (l.msg || 'Copia de la planilla tomada en la fecha indicada.');
+  $('#foot-src').textContent = `Fuente: ${SHEET.source}`;
+  ['obj', 'medio'].forEach(s => $('#sc-' + s).setAttribute('aria-pressed', ST.scenario === s));
+}
+
+// ================= eventos =================
+function setParam(k, v) {
+  ST.vals[k] = v;
+  if (Math.abs(v - ST.base[k]) < 1e-12) ST.touched.delete(k); else ST.touched.add(k);
+}
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.matches('#levers input[type=range]')) {
+    const k = t.dataset.k; setParam(k, +t.value);
+    $('#lvo-' + k).textContent = FMT[DEF[k].fmt](+t.value);
+    t.closest('.lever').classList.toggle('changed', ST.touched.has(k));
+    render();
+  } else if (t.matches('[data-rg],[data-rgn]')) {
+    const i = +(t.dataset.rg ?? t.dataset.rgn); const sc = ST.scenario; let v = Math.max(0, +t.value || 0);
+    ST.rg[sc][i] = v;
+    if (Math.abs(v - ST.rgBase[sc][i]) < 1e-9) ST.rgTouched[sc].delete(i); else ST.rgTouched[sc].add(i);
+    const twin = t.dataset.rg != null ? document.querySelector(`[data-rgn="${i}"]`) : document.querySelector(`[data-rg="${i}"]`);
+    if (twin) twin.value = v;
+    renderPartialKeepFocus();
+  }
+});
+let pt = 0;
+function renderPartialKeepFocus() { clearTimeout(pt); pt = setTimeout(() => { const a = document.activeElement; const sel = a && (a.dataset.rg != null ? `[data-rg="${a.dataset.rg}"]` : a.dataset.rgn != null ? `[data-rgn="${a.dataset.rgn}"]` : null); render(); if (sel) requestAnimationFrame(() => requestAnimationFrame(() => { const n = document.querySelector(sel); if (n) n.focus(); })); }, 120); }
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.matches('select.crop')) {
+    const li = +t.dataset.li, j = +t.dataset.j; ST.rot[li].crops[j] = t.value;
+    const key = li + ':' + j; if (ST.rot[li].crops[j] === ST.rotBase[li].crops[j]) ST.rotTouched.delete(key); else ST.rotTouched.add(key);
+    renderLevers(run(false)); render();
+  } else if (t.matches('[data-pk]')) {
+    const k = t.dataset.pk; const df = DEF[k]; let v = +t.value; if (isNaN(v)) return;
+    if (df.fmt[0] === 'p') v = v / 100;
+    setParam(k, v); renderLevers(run(false)); render();
+  }
+});
+document.addEventListener('click', e => {
+  const t = e.target.closest('button,[data-tab]'); if (!t) return;
+  if (t.dataset.tab) { ST.tab = t.dataset.tab; store.set('remanso.tab', ST.tab); renderTabs(); render(); window.scrollTo({ top: 0 }); return; }
+  if (t.dataset.camp != null) { ST.camp = +t.dataset.camp; render(); return; }
+  if (t.dataset.rk) { setParam(t.dataset.rk, ST.base[t.dataset.rk]); renderLevers(run(false)); render(); return; }
+  switch (t.id) {
+    case 'sc-obj': case 'sc-medio': ST.scenario = t.id.slice(3); renderAll(); break;
+    case 'go-sup': ST.tab = 'supuestos'; store.set('remanso.tab', ST.tab); renderTabs(); render(); window.scrollTo({ top: 0 }); break;
+    case 'reset-all': ST.vals = { ...ST.base }; ST.touched.clear(); ST.rot = deep(ST.rotBase); ST.rotTouched.clear(); ST.rg = deep(ST.rgBase); ST.rgTouched = { obj: new Set(), medio: new Set() }; renderAll(); break;
+    case 'sup-reset': ST.vals = { ...ST.base }; ST.touched.clear(); renderAll(); break;
+    case 'rot-reset': ST.rot = deep(ST.rotBase); ST.rotTouched.clear(); renderAll(); break;
+    case 'reload': loadLive(true); break;
+    case 'theme': { const next = isDark() ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', next); store.set('remanso.theme', next); syncTheme(); break; }
+  }
+});
+// tooltip
+const tip = $('#tip');
+document.addEventListener('mousemove', e => {
+  const t = e.target.closest && e.target.closest('[data-tip]');
+  if (!t || !t.dataset.tip) { tip.hidden = true; return; }
+  tip.innerHTML = t.dataset.tip; tip.hidden = false;
+  const r = tip.getBoundingClientRect(); let x = e.clientX + 14, y = e.clientY + 14;
+  if (x + r.width > innerWidth - 8) x = e.clientX - r.width - 14; if (y + r.height > innerHeight - 8) y = e.clientY - r.height - 14;
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+});
+document.addEventListener('mouseleave', () => { tip.hidden = true; });
+
+// ================= lectura en vivo de la Google Sheet =================
+const SHEET_ID = '1GIOCyu56xpe9lZh3VC6Xgu1tYyONbW8P5KAB3XblnOg';
+let gvN = 0; const gvPending = {};
+window.__remansoGviz = function (resp) { const p = gvPending[resp && resp.reqId]; if (p) { delete gvPending[resp.reqId]; p(resp); } };
+function gviz(sheet, range) {
+  return new Promise((resolve, reject) => {
+    const id = String(++gvN); const s = document.createElement('script');
+    const timer = setTimeout(() => { delete gvPending[id]; s.remove(); reject(new Error('timeout')); }, 9000);
+    gvPending[id] = resp => { clearTimeout(timer); s.remove(); if (resp.status === 'error') reject(new Error('gviz')); else resolve(resp.table); };
+    s.onerror = () => { clearTimeout(timer); delete gvPending[id]; s.remove(); reject(new Error('blocked')); };
+    s.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=reqId:${id};responseHandler:__remansoGviz&headers=0&sheet=${encodeURIComponent(sheet)}&range=${range}&t=${Date.now()}`;
+    document.head.appendChild(s);
+  });
+}
+const cellV = (row, i) => (row && row.c && row.c[i]) ? row.c[i].v : null;
+const norm = s => String(s == null ? '' : s).replace(/\s+/g, ' ').trim().toLowerCase();
+// etiquetas de la hoja Supuestos en orden
+const SUP_LABELS = [['adg', 'Aumento diario de peso PROMEDIO ANUAL (kg/día)'], ['wCab', 'Peso de compra — CABEZA (kg)'], ['wCue', 'Peso de compra — CUERPO (kg)'], ['wCol', 'Peso de compra — COLA (kg)'], ['sCab', 'Reparto del lote — CABEZA (%)'], ['sCue', 'Reparto del lote — CUERPO (%)'], ['sCol', 'Reparto del lote — COLA (%)'], ['overlap', 'Días de superposición con la cabeza del año anterior'], ['cons', 'Consumo diario como % del peso vivo'], ['retDays', 'Días que el CUERPO RETENIDO pasa el verano'],
+  ['ppObj', 'Producción — escenario OBJETIVO (kg MS/ha/año)'], ['ppMed', 'Producción — escenario AÑO MEDIO (kg MS/ha/año)'], ['ppS0', '% de la producción anual en Primavera (sep-nov)'], ['ppS1', '% en Verano (dic-feb)'], ['ppS2', '% en Otoño (mar-may)'], ['ppS3', '% en Invierno (jun-ago)'], ['ppE0', 'Eficiencia de cosecha en Primavera'], ['ppE1', 'Eficiencia de cosecha en Verano'], ['ppE2', 'Eficiencia de cosecha en Otoño'], ['ppE3', 'Eficiencia de cosecha en Invierno'], ['pp1Factor', 'Factor de producción de la pastura en su 1er año (PP 1)'], ['pp1SpringFrac', 'Fracción de la primavera en que produce la PP 1 (oct-nov de sep-nov)'],
+  ['pzProd', 'Producción (kg MS/ha/año)'], ['pzS0', '% en Primavera'], ['pzS1', '% en Verano'], ['pzS2', '% en Otoño'], ['pzS3', '% en Invierno'], ['pzEff', 'Eficiencia de utilización'],
+  ['avProd', 'Avena — producción (kg MS/ha)'], ['avOto', '% en Otoño'], ['avInv', '% en Invierno'], ['avPrim', '% en Primavera'], ['avEff', 'Eficiencia de utilización'],
+  ['rgProd', 'Raigrás al voleo — producción (kg MS/ha)'], ['rgOto', '% en Otoño'], ['rgInv', '% en Invierno'], ['rgPrim', '% en Primavera'], ['rgEff', 'Eficiencia de utilización'],
+  ['occPP', 'Pastura perenne (PP 1 a PP 4)'], ['occPz', 'Pastizal'], ['occSilo', 'Maíz silo'], ['occAv', 'Avena sobre el rastrojo de maíz silo'], ['occRg', 'Raigrás voleado dentro del maíz a grano'],
+  ['siloProd', 'Silaje de maíz planta entera (kg MS/ha)'], ['siloEff', 'Coef. de aprovechamiento del silaje'], ['rolloEff', 'Coef. de aprovechamiento del rollo de pastura'], ['springGraze', '% de la primavera de la pastura destinado a pastoreo'], ['evKg', 'Equivalencia: consumo de 1 EV (kg MS/día)'],
+  ['priceBuy', 'Precio de compra — ternero ($/kg vivo)'], ['priceSell', 'Precio de venta — novillito ($/kg vivo)']];
+async function loadLive(manual) {
+  ST.live.status = 'loading'; renderStatus();
+  try {
+    const [sup, rot, bal, pas] = await Promise.all([gviz('Supuestos', 'A1:B160'), gviz('Rotacion', 'A1:N16'), gviz('Balance forrajero', 'A1:J170'), gviz('Pastoreo rotativo', 'A1:G80')]);
+    const nb = { ...ST.base }; let miss = 0;
+    // Supuestos: búsqueda secuencial por etiqueta
+    let pos = 0; const rows = sup.rows;
+    SUP_LABELS.forEach(([k, lab]) => {
+      const want = norm(lab); let found = -1;
+      for (let i = pos; i < rows.length; i++) if (norm(cellV(rows[i], 0)) === want) { found = i; break; }
+      if (found >= 0 && typeof cellV(rows[found], 1) === 'number') { nb[k] = cellV(rows[found], 1); pos = found + 1; } else miss++;
+    });
+    // Pastoreo rotativo
+    pas.rows.forEach(r => {
+      const a = norm(cellV(r, 0));
+      if (a === norm('Días de ocupación por parcela') && typeof cellV(r, 1) === 'number') nb.ocup = cellV(r, 1);
+      if (a === norm('Eficiencia de cosecha con esa ocupación') && typeof cellV(r, 1) === 'number') nb.rotEff = cellV(r, 1);
+      if (a === norm('Pastura alfalfa + festuca (días)')) [1, 2, 3, 4].forEach((c, i) => { if (typeof cellV(r, c) === 'number') nb['desc' + i] = cellV(r, c); });
+      if (a === norm('Consumo por animal (L/día, verano)') && typeof cellV(r, 1) === 'number') nb.waterL = cellV(r, 1);
+    });
+    // Rotación
+    const rr = rot.rows; let rotNew = null;
+    const hdr = rr.findIndex(r => [5, 6, 7].every(c => /^\d\d\/\d\d$/.test(String(cellV(r, c) || ''))));
+    const dataRows = rr.slice(hdr + 1).filter(r => typeof cellV(r, 3) === 'number' && typeof cellV(r, 5) === 'string' && norm(cellV(r, 0)) !== 'total');
+    if (dataRows.length === ST.rotBase.length) {
+      rotNew = dataRows.map((r, i) => ({ ...ST.rotBase[i], ha: cellV(r, 3), crops: [5, 6, 7, 8, 9, 10, 11, 12, 13].map(c => String(cellV(r, c) || '').trim()) }));
+      if (rotNew.some(l => l.crops.some(c => !CROPS.includes(c)))) rotNew = null;
+    }
+    if (!rotNew) miss++;
+    // Raigrás voleado (palanca de la hoja Balance)
+    const rgRows = bal.rows.filter(r => norm(cellV(r, 0)).startsWith(norm('RAIGRÁS QUE SE VOLEA')));
+    const rgNew = rgRows.length >= 2 ? { obj: [1, 2, 3, 4, 5, 6, 7, 8, 9].map(c => +cellV(rgRows[0], c) || 0), medio: [1, 2, 3, 4, 5, 6, 7, 8, 9].map(c => +cellV(rgRows[1], c) || 0) } : null;
+    if (!rgNew) miss++;
+    // aplicar: lo que el usuario no tocó sigue a la planilla
+    PARAM_DEFS.forEach(d => { const k = d[0]; if (!ST.touched.has(k)) ST.vals[k] = nb[k]; });
+    ST.base = nb;
+    if (rotNew) { ST.rot = ST.rot.map((l, li) => ({ ...rotNew[li], crops: l.crops.map((c, j) => ST.rotTouched.has(li + ':' + j) ? c : rotNew[li].crops[j]) })); ST.rotBase = rotNew; }
+    if (rgNew) { ['obj', 'medio'].forEach(sc => { ST.rg[sc] = rgNew[sc].map((v, i) => ST.rgTouched[sc].has(i) ? ST.rg[sc][i] : v); }); ST.rgBase = rgNew; }
+    const d = new Date(); ST.live = { status: 'live', at: d.toLocaleDateString('es-AR') + ' ' + d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }), msg: miss ? `${miss} dato(s) no se encontraron en la planilla y quedaron con la copia.` : '' };
+    renderAll();
+  } catch (err) {
+    ST.live = { status: 'snapshot', at: SHEET.readAt, msg: 'Este visor no permite leer la planilla en vivo. Se muestra la copia tomada en la fecha indicada.' };
+    renderStatus();
+  }
+}
+
+// ================= tema claro / oscuro =================
+function isDark() {
+  const t = document.documentElement.getAttribute('data-theme');
+  if (t === 'dark') return true; if (t === 'light') return false;
+  return window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches;
+}
+function syncTheme() {
+  const d = isDark(); document.body.classList.toggle('is-dark', d);
+  const b = $('#theme'); b.setAttribute('aria-label', d ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+}
+(function initTheme() {
+  const saved = store.get('remanso.theme'); if (saved === 'dark' || saved === 'light') document.documentElement.setAttribute('data-theme', saved);
+  syncTheme();
+  if (window.matchMedia) matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncTheme);
+  new MutationObserver(syncTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+})();
+
+// ================= inicio =================
+$('#sheet-link').href = SHEET.sheetUrl;
+renderAll();
+loadLive(false);
+setInterval(() => { if (ST.live.status === 'live' && !document.hidden) loadLive(false); }, 120000);
+})();
+
+</script>
+</body></html>
